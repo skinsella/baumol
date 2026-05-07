@@ -372,6 +372,7 @@ def build():
         pages["synthesis.html"] = dict(
             page="synthesis", page_title="Synthesis", syn=syn,
         )
+    pages["glossary.html"] = dict(page="glossary", page_title="Glossary")
     if steelman_excess_chart is not None:
         pages["steelman.html"] = dict(
             page="steelman", page_title="Steelman test",

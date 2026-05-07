@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Plain-English glossary</h1>
+<p class="lede">
+Every term used on this site that might trip up a non-economist reader.
+Listed alphabetically. The word in bold is what the site uses; the
+explanation is in plain language.
+</p>
+
+<dl style="line-height:1.6">
+
+<dt><strong>Baumol's cost disease</strong></dt>
+<dd>The idea that some sectors (services like education, health, hairdressing)
+get more productive much more slowly than others (manufacturing). Because
+workers can move between sectors, wages have to rise in the slow sectors to
+keep up with the fast sectors. The result: prices in slow-productivity
+sectors rise faster than goods prices, even though nothing has gone wrong.
+Named for the economist William Baumol, who described it in 1967.</dd>
+
+<dt><strong>Baumol effect on slope vs intercept</strong></dt>
+<dd>A distinction this site uses to separate two stories. The "slope" is how
+fast service prices drift up relative to goods prices over time —
+mechanically driven by Baumol's wage-pull mechanism. The "intercept" is
+the level prices sit at in any given year — set by market structure,
+supplier power, and procurement design. Different mechanisms; different
+data tests.</dd>
+
+<dt><strong>β (beta), γ (gamma)</strong></dt>
+<dd>Greek letters used as labels for the slopes in the site's regressions.
+β-convergence asks "do initially low-paid sectors grow faster?". γ asks
+"do sectors that fell behind in productivity see faster cost growth?"
+(the headline Baumol prediction). The Greek letters carry no meaning
+beyond "the slope of this line".</dd>
+
+<dt><strong>CAGR</strong></dt>
+<dd>Compound annual growth rate. The single annual % growth that, if applied
+each year, would turn the start value into the end value. Useful when
+the period is multiple years.</dd>
+
+<dt><strong>Cobb-Douglas / Tornqvist</strong></dt>
+<dd>Cobb-Douglas is a textbook way to write the production function:
+output = A × K<sup>α</sup> × L<sup>1-α</sup>, where K is capital and L is
+labour. Tornqvist is a way of averaging the labour share over two adjacent
+years to compute a sensible TFP growth rate. Both are standard. The site
+uses both for constructing TFP growth where EU KLEMS doesn't publish it.</dd>
+
+<dt><strong>COICOP</strong></dt>
+<dd>Eurostat's classification of consumer expenditure into categories. CP01
+is food, CP04 is housing/utilities, CP06 is health, CP11 is restaurants
+and accommodation, etc. Used in the failure-premium and steelman pages
+to slice the price level by purpose.</dd>
+
+<dt><strong>Compensation of employees / hourly labour cost</strong></dt>
+<dd>What a firm actually spends on workers, per hour: wages and salaries
+plus the employer's social-insurance contributions, training costs, and
+miscellaneous non-wage labour costs. The CSO publishes this as EHQ03;
+Eurostat as the labour cost index. The Baumol prediction is about cost,
+not just wages.</dd>
+
+<dt><strong>EU KLEMS</strong></dt>
+<dd>A research database covering output, employment, capital and intangibles
+by sector for European countries from 1995. Built by a consortium of
+European research institutes; maintained by the Luiss Lab in Rome.
+Underpins the replication page.</dd>
+
+<dt><strong>Failure premium</strong></dt>
+<dd>A 2026 essay's term for the extra cost the State pays when it
+outsources a public function (asylum reception, healthcare staffing,
+housing) instead of producing it directly. The argument is that absent
+in-house production capacity, the State enters the market under time
+pressure and accepts whatever price clears, which produces a premium
+relative to direct provision.</dd>
+
+<dt><strong>Fixed effects</strong></dt>
+<dd>A way of controlling for things that don't move within a unit. "Sector
+fixed effects" absorb the average level of each sector. "Year fixed
+effects" absorb common-to-all-sectors annual shocks (a recession, a
+post-pandemic recovery). After fixed effects, the regression coefficient
+captures only the within-unit relationship — sector-by-year deviations
+from the sector and year averages.</dd>
+
+<dt><strong>HAP — Housing Assistance Payment</strong></dt>
+<dd>The Irish State's main rent-subsidy programme, launched in 2014.
+Pays a fraction of the market rent for low-income households in private
+rentals. Often invoked in the failure-premium argument. HAP is a
+demand-side subsidy, not a capital programme, so comparing its cost
+to social-housing capital outlay is a category mismatch.</dd>
+
+<dt><strong>HICP — Harmonised Index of Consumer Prices</strong></dt>
+<dd>The Eurostat-defined consumer price index. Used to measure inflation
+and compare price levels across EU countries on a common basis.</dd>
+
+<dt><strong>HSE — Health Service Executive</strong></dt>
+<dd>The State agency responsible for providing public health and social
+services in Ireland. Major buyer of agency-supplied nursing and
+clinician hours; subject of failure-premium claim 8.</dd>
+
+<dt><strong>Imputed rent</strong></dt>
+<dd>The rent owner-occupiers would pay themselves if they didn't own
+their home. Counted in National Accounts as a service produced and
+consumed by the household, even though no money changes hands. Why
+"real estate activities" (NACE L) shows artefactually huge productivity
+per hour and is dropped from the headline regression.</dd>
+
+<dt><strong>IPAS</strong></dt>
+<dd>The International Protection Accommodation Service, the Irish State's
+provider of accommodation for asylum-seekers awaiting their hearing.
+Heavily reliant on contracted hotel beds since 2014, which is the basis
+of failure-premium claim 3.</dd>
+
+<dt><strong>MNC distortion</strong></dt>
+<dd>Ireland-specific: large multinationals book activity in Ireland that
+doesn't reflect domestic production. Contract manufacturing, IP onshoring,
+aircraft leasing, and corporate domiciliation all inflate sectoral GVA in
+manufacturing (C) and ICT (J). The site's headline regression excludes
+these sectors as a robustness check.</dd>
+
+<dt><strong>NACE</strong></dt>
+<dd>The European industrial classification. Letter-level NACE: A
+(agriculture), B (mining), C (manufacturing), D (electricity), E (water),
+F (construction), G (retail), H (transport), I (accommodation/food),
+J (ICT), K (finance), L (real estate), M (professional services),
+N (admin services), O (public admin), P (education), Q (health),
+R (arts), S (other services). The site uses NACE letters throughout.</dd>
+
+<dt><strong>NTPF — National Treatment Purchase Fund</strong></dt>
+<dd>The State agency that pays private hospitals to clear public
+waiting lists. Often cited in the failure-premium argument as a
+multiplier of healthcare cost via outsourcing.</dd>
+
+<dt><strong>PLI — Price Level Index</strong></dt>
+<dd>Eurostat's cross-country price-level measure. PLI = 100 means the
+country's prices in that category equal the EU27 average. PLI = 150
+means 50% more expensive. Used on the steelman page to compare Irish
+prices in specific categories with the European panel after PPP
+adjustment.</dd>
+
+<dt><strong>PPP — Purchasing Power Parity</strong></dt>
+<dd>An exchange rate that equalises the cost of a representative basket
+of goods and services across countries. PPPs are the basis for cross-
+country price-level comparisons (PLIs). PPP-adjusted figures answer
+"how expensive is this country, in real terms, vs others?".</dd>
+
+<dt><strong>Productivity, labour vs total factor</strong></dt>
+<dd>Labour productivity (LP) = output per hour worked. TFP (total factor
+productivity) is what's left when you've accounted for both capital and
+labour inputs — sometimes called "the residual" or "technology". Both
+are used in this site; LP is more directly observable.</dd>
+
+<dt><strong>RTB — Residential Tenancies Board</strong></dt>
+<dd>The Irish State agency that maintains the rent-tenancy register and
+publishes the rent-index data used in failure-premium claim 6.</dd>
+
+<dt><strong>σ-divergence</strong></dt>
+<dd>The cross-sector standard deviation of (log) hourly labour cost.
+A measure of how spread out pay is across sectors. Falling σ means
+sectors are paying more similar rates over time; rising σ means
+divergence. Plain-English: "how far apart sectors are paying their
+workers".</dd>
+
+<dt><strong>Shift-share decomposition</strong></dt>
+<dd>A way of asking "how much of aggregate productivity growth came from
+changes in sector mix, vs changes within sectors?". Used to test
+Baumol's growth-disease prediction (Hypothesis 6 in the replication).</dd>
+
+<dt><strong>Steelman / strawman</strong></dt>
+<dd>A "steelman" is the strongest version of an argument; a "strawman" is
+the weakest. The site's steelman page deliberately reformulates the
+failure-premium thesis in its strongest form (slope vs intercept) and
+then tests that.</dd>
+
+<dt><strong>TFP — Total Factor Productivity</strong></dt>
+<dd>See "Productivity" above. Computed as the residual after capital and
+labour inputs are accounted for. Standard in growth accounting.</dd>
+
+<dt><strong>ULC — Unit Labour Cost</strong></dt>
+<dd>Hourly labour cost divided by output per hour. The most directly
+Baumol-relevant single number: it captures how much labour cost is
+required to produce one unit of output. Mentioned but not the headline
+focus on this site, since separating labour-cost growth from
+productivity growth is more informative.</dd>
+
+</dl>
+
+<p style="margin-top:2rem">
+<a href="./index.html">Back to overview</a> ·
+<a href="./synthesis.html">Synthesis</a> ·
+<a href="./methods.html">Methods</a>
+</p>
+{% endblock %}
