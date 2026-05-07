@@ -1,37 +1,55 @@
 {% extends "base.html" %}
+{% from "_macros.html" import fig %}
 {% block content %}
-<h1>Productivity and pay</h1>
+<h1>Productivity and pay — does the data support Baumol?</h1>
 <p class="lede">
-The Baumol mechanism predicts that low-productivity-growth sectors see faster
-labour-cost growth than their own productivity warrants. Two tests on Irish data:
-β-convergence in hourly labour cost, and the cost-growth–productivity-gap regression.
+Baumol's idea is simple: if some sectors get more productive faster than
+others but everyone's wages move together, then the slow-productivity
+sectors get more expensive over time. This page tests that prediction
+three ways using Irish data.
 </p>
 
-<h2>Cross-sector dispersion over time</h2>
-{{ sigma_chart.div | safe }}
-{{ sigma_chart.script | safe }}
+<h2>Test 1 — does pay across sectors stay close together?</h2>
+{{ fig(sigma_chart,
+       'figure 1',
+       'Spread of hourly labour cost across sectors, over time',
+       'A single line. Higher means sectors are paying very different hourly rates from each other; lower means they have converged. (Technically: standard deviation of log hourly labour cost across NACE letters each quarter.)',
+       sigma_commentary) }}
 
 <p>
-A flat or declining σ(log hourly cost) is consistent with wage compression across
-sectors despite divergent productivity — Baumol's economy-wide wage pull. A rising
-σ would push back on the mechanism. {{ sigma_commentary }}
+Baumol predicts the line stays flat or falls — wages in slow sectors are
+pulled up to keep the spread modest. A rising line would push back on the
+mechanism.
 </p>
 
-<h2>β-convergence test</h2>
-{{ baumol_chart.div | safe }}
-{{ baumol_chart.script | safe }}
+<h2>Test 2 — do initially low-paid sectors grow faster?</h2>
+{{ fig(baumol_chart,
+       'figure 2',
+       'Cost growth by sector vs starting level',
+       'One dot per sector. The horizontal axis is how expensive an hour of labour was in 2008 (left = cheaper). The vertical axis is how fast hourly labour cost has grown since (per year). The dashed line is the best-fit slope.',
+       'A downward-sloping line would mean cheaper sectors caught up to dearer ones (Baumol). A flat or upward line would mean each sector grew at its own pace. The result for Ireland: see the table below.') }}
 
 <div class="note-box">
-<strong>Convergence regression result.</strong>
-β = {{ conv.beta_initial_log_cost }} (HC3 SE = {{ conv.se_beta }}, t = {{ conv.t_beta }},
+<strong>The numbers behind the chart.</strong>
+β = {{ conv.beta_initial_log_cost }} (HC3 robust SE = {{ conv.se_beta }}, t = {{ conv.t_beta }},
 p = {{ conv.p_beta }}). R² = {{ conv.r2 }}, n = {{ conv.n }} sectors.
 {{ conv_interpretation }}
 </div>
 
-<h2>Headline Baumol test: cost growth vs productivity gap</h2>
+<h2>Test 3 — the headline Baumol regression</h2>
+<p>
+This is the test the Department of Finance and ESRI emphasise in their
+January 2026 paper. Question: among sectors that fell behind in productivity,
+did labour costs nonetheless rise quickly? If yes, Baumol's mechanism is
+visible.
+</p>
+
 {% if prod_gap_chart %}
-{{ prod_gap_chart.div | safe }}
-{{ prod_gap_chart.script | safe }}
+{{ fig(prod_gap_chart,
+       'figure 3',
+       'Cost growth by sector vs productivity gap',
+       'One dot per sector. Horizontal axis: how far behind that sector was on productivity growth, compared with the economy average. Right of zero means slower productivity growth than average. Vertical axis: hourly labour cost growth in that sector. The dashed line is the best-fit slope.',
+       baumol_test_interpretation) }}
 
 <table class="data" style="max-width:560px">
   <thead>
@@ -63,45 +81,33 @@ p = {{ conv.p_beta }}). R² = {{ conv.r2 }}, n = {{ conv.n }} sectors.
   </tbody>
 </table>
 <p class="meta">
-HC3 robust standard errors. L (real estate), T (households-as-employers) and U
-(extraterritorial) dropped throughout — both have small or imputed hours and
-artefactual productivity. CAGR window aligned to the cost series start year.
-</p>
-
-<p>{{ baumol_test_interpretation | safe }}</p>
-
-<p>
-Real GVA per hour worked is computed from Eurostat <code>nama_10_a64</code>
-(chain-linked volumes, 2020 base) divided by hours worked from
-<code>nama_10_a64_e</code>. Productivity in C (Manufacturing) and J (ICT) is
-inflated by MNC contract manufacturing and IP relocation; a robustness check
-that drops both sectors is planned in the next refresh.
-</p>
-{% else %}
-<p>
-The headline Baumol regression is not yet reported in this build because the
-productivity series did not load. The convergence test above uses cost data
-only and is reported in its place.
+HC3 robust standard errors. L (real estate, dominated by imputed dwelling
+rent), T (households-as-employers) and U (extraterritorial) dropped throughout —
+all three have artefactual productivity per hour. The growth-rate window
+matches the cost-data window so the two CAGRs are directly comparable.
 </p>
 {% endif %}
 
-<h2>Stagnant vs progressive share of the wagebill</h2>
-{{ share_chart.div | safe }}
-{{ share_chart.script | safe }}
+<h2>Test 4 — does the stagnant-sector wagebill share rise over time?</h2>
+{{ fig(share_chart,
+       'figure 4',
+       'Share of total wagebill: stagnant sectors vs progressive sectors',
+       'Two lines. The red line is the share of all paid compensation going to traditionally low-productivity-growth sectors (transport, accommodation, education, health, arts, other services). The blue line is the share going to high-productivity-growth sectors (manufacturing, ICT, finance).',
+       share_commentary) }}
 
 <p>
-Baumol's third headline prediction — sometimes called Baumol's disease in the strict
-sense — is that the stagnant sectors' share of total compensation rises over time as
-their relative price rises and as employment reallocates toward them. {{ share_commentary }}
+Baumol's third prediction — sometimes called Baumol's <em>disease</em> in the
+strict sense — is that an ageing, services-using population shifts more of the
+wagebill into stagnant sectors over time, even if hours don't shift.
 </p>
 
-<h2>What's missing here</h2>
+<h2>What this page does not do (yet)</h2>
 <p>
-This page intentionally stops short of a full ULC decomposition because the
-sectoral productivity series for Ireland are heavily distorted by MNC activity
-in C (Manufacturing) and J (ICT). Eurostat <code>nama_10_a64</code> records the
-gross GVA those sectors generate domestically, but the implied labour productivity
-is not a domestic-economy number. The methods page documents the modified-GVA
-adjustment used for cross-checks; updates planned in the next refresh.
+A full unit-labour-cost decomposition uses sector-specific output deflators,
+which are heavily distorted in Irish manufacturing (C) and ICT (J) by
+multinational accounting. The replication page applies the standard
+EU KLEMS treatment to that problem. The next refresh will add a
+domestic-only Irish productivity series using the CSO foreign-vs-domestic
+split.
 </p>
 {% endblock %}

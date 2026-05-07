@@ -1,0 +1,9 @@
+{% macro fig(chart, signpost, title, explainer, takeaway='') %}
+<figure class="fig">
+  <p class="fig-title">{% if signpost %}<span class="signpost">{{ signpost }}</span>{% endif %}{{ title }}</p>
+  <p class="fig-explainer">{{ explainer | safe }}</p>
+  {{ chart.div | safe }}
+  {{ chart.script | safe }}
+  {% if takeaway %}<figcaption><strong>What it says:</strong> {{ takeaway | safe }}</figcaption>{% endif %}
+</figure>
+{% endmacro %}

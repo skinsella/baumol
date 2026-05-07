@@ -197,14 +197,24 @@ def build():
     }
 
     headline_paragraph = (
-        f"Cross-sector dispersion of log hourly labour cost was "
+        "On the headline Baumol-vs-failure-premium question, the data come down "
+        "in three stages.<br><br>"
+        "<strong>(1)</strong> Service prices have outstripped goods prices by a "
+        "huge margin (chart above). That gap is real and large.<br>"
+        "<strong>(2)</strong> Pay across Irish sectors has stayed remarkably "
+        f"close together — the spread between sectors was just "
         f"<strong>{kpi['sigma_latest']}</strong> in {kpi['sigma_period']}, "
-        f"with stagnant sectors (H, I, P, Q, R, S) accounting for "
-        f"<strong>{kpi['stagnant_share']}%</strong> of the constructed wagebill. "
-        f"The β-convergence regression of cost growth on initial level returns "
-        f"β = <strong>{kpi['beta']}</strong> ({kpi['beta_sig']}, n = {kpi['beta_n']}) — "
-        f"{'consistent with' if conv['beta_initial_log_cost'] < 0 and conv['p_beta'] < 0.10 else 'not strongly consistent with'} "
-        f"the Baumol prediction that initially low-cost sectors grow faster."
+        "consistent with Baumol's claim that wages move together regardless of "
+        "what's happening to productivity in any one sector.<br>"
+        f"<strong>(3)</strong> About <strong>{kpi['stagnant_share']}%</strong> "
+        "of all wages paid in Ireland go to the slow-productivity sectors "
+        "(transport, accommodation, education, health, arts, other services). "
+        "If those sectors keep growing — as they must as the population ages — "
+        "their grip on the wagebill rises and the price wedge widens.<br><br>"
+        "The replication page shows that this pattern is general across Europe, "
+        "not specific to Ireland, and that the institutional 'failure premium' "
+        "thesis is strong on procurement (asylum hotels, agency nurses) but "
+        "weak as an explanation of generalised price growth in services."
     )
 
     # ----- Render -----

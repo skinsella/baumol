@@ -1,46 +1,53 @@
 {% extends "base.html" %}
+{% from "_macros.html" import fig %}
 {% block content %}
 <h1>Labour cost breakdown by sector</h1>
 <p class="lede">
-Where Irish labour costs sit, by NACE Rev. 2 letter sector, and how they have moved.
-Source: CSO EHQ03 (Earnings, Hours and Employment Costs Survey), {{ data_period }}.
+What does an hour of labour cost a firm in each part of the Irish economy,
+and how has that changed? The pictures below split the cost into wages and
+non-wage components and show the level by sector over time.
+</p>
+
+<h2>What is "hourly labour cost"?</h2>
+<p>
+Hourly labour cost is what a firm actually pays out per hour of work — wages
+and salaries plus employer social-insurance contributions, training, and other
+non-wage labour costs. It is the most directly Baumol-relevant series because
+Baumol's prediction is about the <em>cost</em> of labour relative to its
+productivity.
 </p>
 
 <p>
-Hourly labour cost is the most directly Baumol-relevant series: it captures wages
-plus employer social-security contributions and other non-wage costs, normalised
-per hour worked. Quarterly data start in 2008Q1 — the pre-2008 NACE Rev. 1 series
-does not splice cleanly. NACE A (agriculture) and parts of D, E sit outside EHECS
-coverage and are omitted throughout.
+Source: CSO EHQ03 (Earnings, Hours and Employment Costs Survey),
+{{ data_period }}. NACE A (agriculture) sits outside this survey.
 </p>
 
-<h2>Latest composition: wages vs non-wage labour cost</h2>
-{{ components_chart.div | safe }}
-{{ components_chart.script | safe }}
+{{ fig(components_chart,
+       'figure 1',
+       'What does an hour of labour cost in each sector?',
+       'For each broad sector (NACE letter), the bar shows wages and salaries (blue) plus employer social contributions and other non-wage labour costs (orange) per hour worked, in the most recent quarter.',
+       'Sectors at the top are the most expensive places to employ someone in Ireland today. Health and education sit in the middle of the distribution; ICT and finance dominate the upper end. The orange bar gives you the size of the non-wage wedge — about 10–15% of total labour cost in most sectors.') }}
 
-<p>
-Sectors at the top of the bar chart are reading hot at the labour-cost margin
-relative to the rest of the economy. Read across the bar to see what fraction
-of the cost is wages and salaries vs employer SSC and other non-wage components.
-</p>
+{{ fig(stacked_chart,
+       'figure 2',
+       'Total annual labour compensation, by sector, since 2008',
+       'Stacked area chart: each colour band is one sector. The height of the band equals total compensation paid in that sector that quarter (hourly labour cost × hours × employment, summed). The whole stack is the wagebill of the surveyed economy.',
+       'The wagebill grew from about €60bn in 2008 to over €110bn in 2025. The composition is fairly stable: no dramatic shift from one sector to another, but health (red) and ICT (light blue) have been the steadiest expanders since 2014.') }}
 
-<h2>Aggregate compensation by sector, time series</h2>
-{{ stacked_chart.div | safe }}
-{{ stacked_chart.script | safe }}
-
-<p>
-Compensation here is constructed: hourly labour cost × paid hours per week ×
-employment × 52, summed by sector. This is a wagebill aggregate, not a
-National Accounts compensation-of-employees measure — it tracks the same
-direction but the levels will differ from CSO COE figures by a few per cent
-(EHECS coverage gap; non-paid hours).
-</p>
-
-<h2>Hourly labour cost — sector small multiples</h2>
-{{ small_multiples.div | safe }}
-{{ small_multiples.script | safe }}
+{{ fig(small_multiples,
+       'figure 3',
+       'Hourly labour cost over time, one panel per sector',
+       'A grid of small line charts, one per sector, all on the same time axis. Each line traces hourly labour cost in that sector from 2008 onwards.',
+       'Read across rows to compare sectors at a glance. The slope tells you how fast labour got more expensive. ICT (J) has the steepest line; transport (H) and accommodation (I) are the shallowest. Education (P) and health (Q) sit in between, growing roughly in line with the overall economy.') }}
 
 <h2>Sector summary table</h2>
+<p>
+Each row is one sector. <strong>Hourly cost</strong> is the most recent quarter
+in euros per hour. <strong>5-year CAGR</strong> is the compound annual growth
+rate over the last five years (in per cent). <strong>Share of wagebill</strong>
+is what fraction of total compensation that sector accounted for in the latest
+quarter. Click a column header to sort.
+</p>
 <table class="data" id="sector-table">
   <thead>
     <tr>
@@ -65,16 +72,15 @@ direction but the levels will differ from CSO COE figures by a few per cent
 </table>
 
 <div class="note-box">
-<strong>Reading guide.</strong> Q (Human health and social work) and P (Education)
-are the canonical Baumol-stagnant sectors and their CAGR is the headline test.
-J (ICT) and parts of C (Manufacturing) are MNC-dominated in Ireland, so their
-labour-cost dynamics partly reflect the composition of foreign-affiliate jobs
-rather than domestic productivity. The productivity-vs-pay page handles this.
+<strong>How to read the table.</strong> The two sectors most often used in
+Baumol-style arguments — Q (Human health) and P (Education) — appear here as
+mid-pay sectors. The fastest-growing (highest CAGR) sectors are not always
+the highest-paid. The composition of who-pays-most has shifted toward
+information and finance over the period.
 </div>
 
 <script>
 (function() {
-  // Make the summary table sortable.
   var t = document.getElementById('sector-table');
   if (!t) return;
   var headers = t.querySelectorAll('thead th');

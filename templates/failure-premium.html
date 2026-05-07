@@ -2,19 +2,26 @@
 {% block content %}
 <h1>Testing the "failure premium" thesis</h1>
 <p class="lede">
-A 2026 essay argued that high Irish costs reflect a structural "failure premium" —
-the price of state outsourcing rather than provision. Each numbered claim is tested
-below against public data. Verdicts are recorded as <em>refuted</em>,
-<em>partially refuted</em>, <em>confirmed</em>, <em>reframed</em>, or <em>untestable</em>.
+A 2026 essay argued that Ireland's high prices come not from productivity
+arithmetic but from institutional choice — the State outsourcing things it
+should provide directly, and paying a margin for the privilege. Each
+numbered claim from that essay is tested below against public data.
 </p>
 
+<h2>The five possible verdicts, in plain terms</h2>
+<ul>
+  <li><span class="verdict refuted">REFUTED</span> the data say the claim is wrong.</li>
+  <li><span class="verdict partial">PARTIAL</span> part of the claim holds, part doesn't.</li>
+  <li><span class="verdict confirmed">CONFIRMED</span> the data support the claim.</li>
+  <li><span class="verdict reframed">REFRAMED</span> the numbers are right but the mechanism implied by the claim is misstated. (Typical case: a demand subsidy is compared to capital spending — apples to oranges.)</li>
+  <li><span class="verdict untestable">UNTESTABLE</span> can't be checked from public data within this build.</li>
+</ul>
+
 <div class="note-box">
-<strong>Adjudication rule.</strong> A claim is refuted only when public data
-materially contradicts it. A claim is reframed when the underlying number is
-correct but the inferred mechanism is misspecified (most often: a demand
-subsidy compared to a capital programme, or a like-for-unlike international
-comparison). This page is intentionally dispassionate: where the institutional
-thesis survives a test, it is reported as such.
+<strong>Adjudication standard.</strong> Where the institutional thesis
+survives a test, it is reported as confirmed. The page is intentionally
+dispassionate — the site does not have a stake in either thesis "winning",
+only in matching the data.
 </div>
 
 {% for c in claims %}
@@ -32,16 +39,25 @@ thesis survives a test, it is reported as such.
 </div>
 {% endfor %}
 
-<h2>How to read these verdicts collectively</h2>
+<h2>What the verdicts add up to</h2>
 <p>
-The pattern across claims matters more than any single one. If most testable
-claims involving market services (housing rents, hotel prices, healthcare wages)
-trace to underlying labour-cost dynamics that are unexceptional given Irish wage
-levels, the failure-premium thesis is more limited than its presentation
-suggests. If a meaningful subset of claims survives — for instance the asylum
-hotel-bed cost decomposition, where the international gap is too large for
-wage differentials alone to explain — that subset deserves the policy weight.
-The verdicts page is intended as a worked example of where each story
-applies, not a debating point.
+No story wins outright. Two patterns stand out:
+</p>
+<ol>
+  <li><strong>Where the claim hinges on prices alone</strong> (rents up 89%,
+    hotels 27% above 2019, healthcare more expensive than in 2014): the
+    headline number is usually right, but a large share of the rise traces
+    to wage growth in those sectors — which is what Baumol predicts in any
+    high-wage economy. The institutional thesis does not need to be invoked
+    to explain the price level.</li>
+  <li><strong>Where the claim hinges on procurement structure</strong>
+    (asylum hotel-bed cost vs Netherlands, agency-nurse premia): the gap is
+    too large for wages alone to explain. The institutional thesis survives
+    these tests. They are about how the State buys things, not about
+    productivity.</li>
+</ol>
+<p>
+In short: the failure-premium argument is strong on procurement and weak on
+prices.
 </p>
 {% endblock %}

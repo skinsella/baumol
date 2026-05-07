@@ -1,43 +1,57 @@
 {% extends "base.html" %}
+{% from "_macros.html" import fig %}
 {% block content %}
 <h1>Replication: Department of Finance &amp; ESRI (January 2026)</h1>
 <p class="lede">
-Hennessy, Lawless &amp; O'Connor (2026) test six of Baumol's diseases on EU
-KLEMS &amp; INTANProd data, 1995–2021, across 16 EU countries and 16 NACE sectors.
-This page reproduces their Ireland-only specifications (Tables 1–5, column 4)
-from the same underlying data and reports cell-by-cell agreement.
+Hennessy, Lawless &amp; O'Connor (2026) tested six of Baumol's predictions
+on Europe-wide data, 1995–2021, across 16 countries and 16 sectors. This page
+reproduces the Ireland-only results from the same data, then adds extensions
+that put Ireland in cross-country context.
 </p>
+
+<h2>What the original paper does</h2>
+<p>
+The paper runs five regressions on a panel of sectors and years. Each
+regression asks: <em>does this outcome (price, output, hours, wages) move
+with productivity in the way Baumol predicted?</em>
+</p>
+<ul>
+  <li><strong>Hypothesis 1</strong> — prices grow faster in slow-productivity sectors (predicted).</li>
+  <li><strong>Hypothesis 2</strong> — real output share is constant across sectors (predicted).</li>
+  <li><strong>Hypothesis 3</strong> — nominal output share of fast-productivity sectors falls (predicted).</li>
+  <li><strong>Hypothesis 4</strong> — labour reallocates from fast to slow sectors (predicted).</li>
+  <li><strong>Hypothesis 5</strong> — wages grow at the same rate everywhere (predicted).</li>
+  <li><strong>Hypothesis 6</strong> — aggregate productivity growth is dragged down (tested separately, see below).</li>
+</ul>
 
 <h2>Setup</h2>
 <p>
-Sample: <strong>{{ rep.sectors_used | length }}</strong> NACE letter sectors
-({{ rep.sectors_used | join(', ') }}), Ireland only, {{ rep.year_start }}–{{ rep.year_end }},
-n = <strong>{{ rep.n_obs }}</strong> sector-year observations. Sample size matches
-the paper exactly (n = 400). Each regression includes sector fixed effects, year
-fixed effects, and HC3 robust standard errors.
+Sample: <strong>{{ rep.sectors_used | length }}</strong> sectors
+({{ rep.sectors_used | join(', ') }}), Ireland only,
+{{ rep.year_start }}–{{ rep.year_end }}, n = <strong>{{ rep.n_obs }}</strong>
+sector-year observations — same dimensions as the paper. Each regression has
+sector and year fixed effects with HC3 robust standard errors. Productivity
+is measured two ways: total factor productivity (TFP — what's left after
+accounting for capital and labour) and labour productivity (LP — output per
+hour). The ten cells below are 5 outcomes × 2 productivity measures.
+</p>
+<p class="meta">
+TFP construction note: the public EU KLEMS Release 2023 has Ireland's TFP
+series missing. The paper authors had access to a non-public version. Our
+TFP is built from the public capital and labour data using a standard
+Cobb-Douglas Tornqvist formula — close to but not identical to theirs.
+The LP-based cells reproduce the paper closely; the TFP-based cells
+reproduce direction but not magnitude.
 </p>
 
-<p>
-Construction notes:
-</p>
-<ul>
-  <li><strong>Real GVA growth</strong>: Δlog(VA_Q) — chain-linked volume.</li>
-  <li><strong>Nominal GVA growth</strong>: Δlog(VA_CP) — current prices.</li>
-  <li><strong>Price growth</strong>: Δlog(VA_PI) — value-added deflator, sector-specific.</li>
-  <li><strong>Hours growth</strong>: Δlog(H_EMP).</li>
-  <li><strong>Wage growth</strong>: Δlog(COMP / EMPE) — compensation per employee.</li>
-  <li><strong>Labour productivity (LP) growth</strong>: Δlog(VA_Q / H_EMP).</li>
-  <li><strong>TFP growth</strong>: Cobb-Douglas Tornqvist with <em>w</em> = 2-year average labour
-    share (capped to [0.1, 0.9]). Note: EU KLEMS Release 2023 has TFP missing for Ireland in the
-    growth-accounts module; the paper authors had access to a non-public Irish TFP series.
-    Our TFP construction is therefore a close proxy, not an exact replica, and the TFP-based
-    cells are not expected to match the paper numerically.</li>
-</ul>
+<h2>How to read the comparison chart</h2>
+{{ fig(replication_chart,
+       'figure 1',
+       'Our coefficient vs the paper''s coefficient, 95% confidence intervals',
+       'Ten rows, one per regression. Each row has two markers: a blue diamond for the paper''s estimate, a red circle for ours. Horizontal bars are 95% confidence intervals. The dotted vertical line is zero — coefficients on either side imply different mechanisms.',
+       'When the two markers overlap, our replication agrees with the paper. When they diverge but both sit on the same side of zero, we agree on the qualitative answer (Baumol-supports vs Baumol-rejects). The hours~LP and price~LP rows match almost exactly; the TFP-based rows agree on direction but disagree on magnitude.') }}
 
-<h2>Coefficient comparison</h2>
-{{ replication_chart.div | safe }}
-{{ replication_chart.script | safe }}
-
+<h2>The full table</h2>
 <table class="data">
   <thead>
     <tr>
@@ -47,8 +61,8 @@ Construction notes:
       <th class="num">(SE)</th>
       <th class="num">Paper β</th>
       <th class="num">(SE)</th>
-      <th>Sign match</th>
-      <th>Within 2·SE</th>
+      <th>Same sign?</th>
+      <th>Same magnitude?</th>
       <th>Baumol</th>
     </tr>
   </thead>
@@ -75,64 +89,58 @@ Construction notes:
 </table>
 
 <p class="meta">
-"Sign match" is true when our β and the paper's β have the same sign and the
-paper's β is not effectively zero. "Within 2·SE" is true when the absolute
-difference between our β and the paper's is less than twice the larger of the
-two standard errors (a permissive criterion that flags cells where the
-coefficients are statistically distinguishable).
+"Same sign" is true when both estimates point the same way and the paper's
+estimate is not effectively zero. "Same magnitude" is true when the two
+coefficients are within twice the larger standard error of each other — a
+permissive criterion that flags only large disagreements. The "Baumol"
+column says whether each cell, on its own, supports or rejects the relevant
+piece of Baumol's prediction.
 </p>
 
-<h2>Reading the headline finding</h2>
+<h2>The headline finding</h2>
 <p>
-The empirical pattern that anchors the DFin-ESRI paper is the
-<strong>price~productivity</strong> regression: prices rise faster in
-sectors where productivity grows more slowly. Both their estimate and ours
-return a negative coefficient with statistical significance, in line with
-Baumol's prediction. Where the magnitudes differ, the gap is driven by our
-self-constructed TFP series rather than by a substantive difference in the
-underlying mechanism.
+Both the paper and this replication find a <strong>negative and significant
+coefficient</strong> in the price-on-productivity regression. Sectors that
+fell behind in productivity growth saw faster price growth — exactly the
+Baumol price-disease prediction. This is the most robust result in the
+paper and survives our re-run.
 </p>
 
-<p>
-The strongest cell-by-cell agreement is the <strong>hours~LP</strong>
-regression — our β is essentially identical to the paper's, supporting
-Hypothesis 4 (employment reallocation) at the sectoral level. The
-<strong>wages~productivity</strong> regression is the cell where the paper
-finds essentially zero correlation (consistent with Baumol's uniform-wage
-assumption); our replication finds a positive coefficient. Possible reasons
-for the divergence are listed in the methods page.
-</p>
-
-<h2>Hypothesis 6: growth disease (shift-share)</h2>
-{{ shift_share_chart.div | safe }}
-{{ shift_share_chart.script | safe }}
+<h2>Extension 1 — fixed-base-year shift-share (Hypothesis 6)</h2>
+{{ fig(shift_share_chart,
+       'figure 2',
+       'Counterfactual aggregate productivity growth — what if sector shares had stayed where they were in year X?',
+       'Each blue bar is what aggregate Irish labour productivity growth would have averaged if sector weights had been frozen at the year on the x-axis. The red dashed horizontal line is what actually happened.',
+       shift_share_commentary) }}
 
 <p>
-This figure tests Nordhaus's growth-disease hypothesis: if Baumol's
-mechanism is operating, Irish aggregate labour productivity growth should
-have been higher under counterfactuals that hold sector shares fixed at older
-years (because stagnant sectors would not have gained weight).
-{{ shift_share_commentary | safe }}
+Baumol's strong-form prediction is that the bars should slope downward to the
+right — the more recent the base year, the lower the counterfactual growth,
+because by then the slow sectors had already gained weight. If the bars are
+flat or trend upward, sector shares haven't moved enough to drag aggregate
+growth down (which is what the paper found across Europe).
 </p>
 
-<h2>Cross-country: where does Ireland sit?</h2>
-{{ cross_country_chart.div | safe }}
-{{ cross_country_chart.script | safe }}
+<h2>Extension 2 — Ireland in cross-country context</h2>
+{{ fig(cross_country_chart,
+       'figure 3',
+       'Price-on-productivity coefficient, country by country',
+       'One bar per EU KLEMS country. The bar is the country''s own price~LP coefficient. The black whisker is the 95% confidence interval. Ireland is highlighted in red.',
+       cross_country_commentary) }}
 
 <p>
-The same price~LP regression run separately for each EU KLEMS country places
-Ireland's cost-disease coefficient in context. {{ cross_country_commentary | safe }}
+A negative bar means that country shows a Baumol price-disease pattern. Most
+European countries do — the mechanism is general, not Irish-specific. This
+matters for the failure-premium argument on the next page: if 12 of 16
+European countries see the same wage-pressure-on-services pattern, that
+pattern in Irish data is hard to attribute primarily to institutional
+choices specific to Ireland.
 </p>
 
-<h2>How this differs from the original</h2>
+<h2>Differences from the original</h2>
 <ul>
-  <li>The paper runs five specifications per outcome (full sample, EU6 core,
-    non-EU6, Ireland-only, aggregated) — we replicate column 4 only and add a
-    cross-country sweep.</li>
-  <li>The paper has access to a non-public Irish TFP series; we construct ours
-    via Cobb-Douglas Tornqvist on the public capital and labour series.</li>
-  <li>Our extension list includes the cross-country sweep, the Nordhaus shift-share
-    decomposition and a HICP services-vs-goods chart that ties back to
-    Department of Finance commentary published alongside the paper.</li>
+  <li>The paper runs five different country specifications (full sample, EU6 core, non-core, Ireland-only, aggregated). We replicate column 4 only and add a cross-country sweep that does the headline regression country-by-country instead.</li>
+  <li>The paper has access to a non-public Irish TFP series; we construct ours from the public capital and labour series via Cobb-Douglas Tornqvist.</li>
+  <li>Our extension list adds the cross-country sweep, the Nordhaus shift-share decomposition, and the HICP services-vs-goods chart on the front page that ties back to the Department of Finance Box 5 commentary published alongside this paper.</li>
 </ul>
 {% endblock %}

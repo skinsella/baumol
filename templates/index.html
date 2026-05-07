@@ -1,72 +1,76 @@
 {% extends "base.html" %}
+{% from "_macros.html" import fig %}
 {% block content %}
 <h1>Baumol's cost disease in Ireland</h1>
 <p class="lede">
-Two competing stories about why Irish service-sector costs keep rising.
-This site tests both against the public data and reports the verdicts.
+Why do Irish services keep getting more expensive while goods barely move?
+This site tests two competing answers against the public data and reports
+which one the data support.
 </p>
 
+<h2>The two stories, in plain terms</h2>
 <p>
-The classical Baumol-Bowen account is mechanical: in a high-income economy with
-integrated labour markets, wages in low-productivity-growth sectors must rise to
-attract workers, so unit labour costs and relative prices in those sectors drift
-upward. The competing story — recently advanced in 2026 popular commentary — is
-institutional: Irish costs are inflated by rent extraction enabled by absent state
-capacity, with a recurring "failure premium" that has nothing to do with productivity.
+<strong>Story 1 — Baumol's cost disease.</strong> A barber takes the same time to
+cut hair today as in 1970, but a factory worker now produces far more cars per
+hour. Because workers can move between sectors, the barber's wage has to rise
+to keep up with the factory wage. Result: services get steadily more expensive
+relative to goods, even though nothing has gone wrong. This is mechanical, not
+a failure.
 </p>
-
 <p>
-These are empirically distinguishable in many places. Where Irish cost growth tracks
-what Baumol mechanics predict at Ireland's wage level, the institutional story loses
-purchasing power. Where Irish costs diverge from peers controlling for wages, it gains.
-This site decomposes the gap.
+<strong>Story 2 — the "failure premium".</strong> Irish costs are high because
+the State outsources core functions (housing, asylum reception, healthcare
+staffing) to private actors who charge a margin. The high prices reflect
+institutional choice, not productivity arithmetic.
+</p>
+<p>
+These predict different patterns in the data. Where Irish service-cost growth
+matches what we'd expect from a high-wage economy with low service-sector
+productivity growth, Story 1 wins on that question. Where Irish prices are
+inflated beyond what wages and productivity can explain, Story 2 wins.
 </p>
 
 <div class="kpis">
   <div class="kpi">
-    <div class="label">σ-divergence (latest)</div>
+    <div class="label">Pay spread across sectors</div>
     <div class="value">{{ kpi.sigma_latest }}</div>
-    <div class="sub">cross-sector σ(log hourly cost), {{ kpi.sigma_period }}</div>
+    <div class="sub">how far apart sectors are paying ({{ kpi.sigma_period }}); lower = more compressed</div>
   </div>
   <div class="kpi">
-    <div class="label">Stagnant share of wagebill</div>
+    <div class="label">Wagebill in slow-productivity sectors</div>
     <div class="value">{{ kpi.stagnant_share }}%</div>
-    <div class="sub">H, I, P, Q, R, S as % of total, {{ kpi.share_period }}</div>
+    <div class="sub">share of all pay going to transport, accom., education, health, arts, other ({{ kpi.share_period }})</div>
   </div>
   <div class="kpi">
-    <div class="label">Health cost CAGR (5y)</div>
+    <div class="label">Health labour cost — 5-year growth</div>
     <div class="value">{{ kpi.health_cagr }}%</div>
-    <div class="sub">hourly labour cost growth, sector Q</div>
+    <div class="sub">how fast an hour of healthcare labour got more expensive (per year)</div>
   </div>
   <div class="kpi">
-    <div class="label">Convergence β</div>
+    <div class="label">Do cheap sectors catch up?</div>
     <div class="value">{{ kpi.beta }}</div>
-    <div class="sub">{{ kpi.beta_sig }}, n = {{ kpi.beta_n }} sectors</div>
+    <div class="sub">closer to zero = no, sectors grew at their own pace ({{ kpi.beta_sig }}, n = {{ kpi.beta_n }})</div>
   </div>
 </div>
 
-<h2>The price wedge</h2>
+<h2>The price wedge — Ireland in one picture</h2>
 {% if hicp_chart %}
-{{ hicp_chart.div | safe }}
-{{ hicp_chart.script | safe }}
-<p>
-The most direct visual evidence consistent with a Baumol mechanism is the
-divergence of services and goods prices in Ireland's HICP. Since 2000 service
-prices have roughly doubled while goods prices have barely moved. Whether this
-gap is <em>caused</em> by productivity divergence — Baumol's prediction — or
-by something else is what the regressions on later pages decompose.
-</p>
+{{ fig(hicp_chart,
+       'figure 1',
+       'Services prices vs goods prices, Ireland, 2000 = 100',
+       'Two lines: the average price of services in Ireland, and the average price of goods. Both start at 100 in 2000. The chart shows what the consumer price index has done to each since then.',
+       'Services prices have roughly doubled since 2000. Goods prices have barely moved. This is the gap the rest of the site sets out to explain — and it is exactly the pattern Baumol predicted in 1967.') }}
 {% endif %}
 
-<h2>Headline finding</h2>
+<h2>Headline finding from the data</h2>
 <p>{{ headline_paragraph | safe }}</p>
 
 <h2>Where to read next</h2>
 <ul>
-  <li><a href="./labour-costs.html">Labour costs by sector</a> — the breakdown, levels, components, and 5-year growth.</li>
-  <li><a href="./productivity.html">Productivity vs pay</a> — the Baumol regressions and unit labour cost.</li>
-  <li><a href="./failure-premium.html">Failure premium</a> — claim-by-claim tests of the institutional thesis.</li>
-  <li><a href="./replication.html">Replication</a> — Department of Finance &amp; ESRI (January 2026) Tables 1–5 reproduced from EU KLEMS.</li>
-  <li><a href="./methods.html">Methods and data</a> — exact tables, deflators, sample period, MNC caveats.</li>
+  <li><a href="./labour-costs.html"><strong>Labour costs by sector</strong></a> — what each sector pays per hour, and how that has grown.</li>
+  <li><a href="./productivity.html"><strong>Productivity and pay</strong></a> — does the data show wages rising faster in low-productivity sectors? (The core Baumol test.)</li>
+  <li><a href="./replication.html"><strong>Replication</strong></a> — reproduction of the Department of Finance &amp; ESRI January 2026 paper, with Ireland in cross-country context.</li>
+  <li><a href="./failure-premium.html"><strong>Failure premium</strong></a> — claim-by-claim tests of the institutional alternative.</li>
+  <li><a href="./methods.html"><strong>Methods and data</strong></a> — every dataset, deflator, sample-period choice and caveat.</li>
 </ul>
 {% endblock %}
