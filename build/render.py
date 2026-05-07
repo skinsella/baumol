@@ -111,6 +111,31 @@ def build():
         print(f"  rent index load failed: {e}")
         rent_idx = None
 
+    print("Loading HICP CP11 decomposition for claim 7...")
+    try:
+        from build.loaders import hicp_cp11_decomposition
+        hicp_decomp = hicp_cp11_decomposition()
+    except Exception as e:
+        print(f"  CP11 decomposition failed: {e}")
+        hicp_decomp = None
+
+    print("Loading sector-Q hourly cost for claim 8...")
+    try:
+        q_latest = long_df[(long_df["sector"] == "Q") &
+                           (long_df["stat"] == "hourly_labour_cost")].sort_values("period").iloc[-1]["value"]
+        sector_q_hourly_cost = float(q_latest)
+    except Exception as e:
+        print(f"  sector-Q latest lookup failed: {e}")
+        sector_q_hourly_cost = None
+
+    print("Loading EU self-employment rates for claim 10...")
+    try:
+        from build.loaders import eu_self_employment_rates
+        self_emp_table = eu_self_employment_rates()
+    except Exception as e:
+        print(f"  self-employment fetch failed: {e}")
+        self_emp_table = None
+
     print("Loading HICP services-vs-goods for headline chart...")
     try:
         sg_df = hicp_services_vs_goods_indices()
@@ -125,7 +150,12 @@ def build():
         coicop_df = pd.DataFrame()
 
     print("Building failure-premium claim cards...")
-    claims = failure_premium.all_claims(hicp_df=hicp_df, rent_index=rent_idx)
+    claims = failure_premium.all_claims(
+        rent_index=rent_idx,
+        hicp_decomp=hicp_decomp,
+        sector_q_hourly_cost=sector_q_hourly_cost,
+        self_emp_table=self_emp_table,
+    )
     if not coicop_df.empty:
         for c in claims:
             if c["id"] == 7:

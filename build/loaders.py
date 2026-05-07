@@ -174,6 +174,61 @@ def labour_productivity_annual(*, exclude_mnc_heavy: bool = False) -> pd.DataFra
     return m[["period", "sector", "sector_label", "prod"]].reset_index(drop=True)
 
 
+def hicp_cp11_decomposition() -> dict:
+    """Decompose IE HICP CP11 (restaurants/accommodation) cumulative rise
+    since 2019 into wage component and residual.
+
+    Returns dict with: ie_total_pct, ea_total_pct, ie_wage_pct.
+    Used by failure-premium claim 7.
+    """
+    out = {}
+    for geo, key in [("IE", "ie_total_pct"), ("EA20", "ea_total_pct")]:
+        raw = eurostat.fetch_dataset(
+            "prc_hicp_midx",
+            params={"geo": geo, "unit": "I15", "coicop": "CP11"},
+            max_age_hours=24,
+        )
+        df = eurostat.to_long_df(raw)
+        df["period"] = pd.PeriodIndex(df["time"], freq="M")
+        df = df.sort_values("period")
+        v_2019 = df[df["period"].dt.year == 2019]["value"].mean()
+        v_latest = df.iloc[-1]["value"]
+        out[key] = float((v_latest / v_2019 - 1) * 100)
+
+    # Sector I labour cost growth, same window — fetched fresh from CSO via labour_costs_quarterly
+    lc = labour_costs_quarterly()
+    si = lc[(lc["sector"] == "I") & (lc["stat"] == "hourly_labour_cost")].sort_values("period")
+    v_lc_2019 = si[si["period"].apply(lambda p: p.year == 2019)]["value"].mean()
+    v_lc_latest = si.iloc[-1]["value"]
+    out["ie_wage_pct"] = float((v_lc_latest / v_lc_2019 - 1) * 100)
+    return out
+
+
+def eu_self_employment_rates(year: int = 2024) -> pd.DataFrame:
+    """EU self-employment rates (15-74) for the latest year via lfsa_egaps."""
+    countries = ["IE", "DE", "FR", "NL", "BE", "DK", "SE", "AT", "FI", "LU",
+                 "ES", "IT", "EL", "PT", "PL", "CZ", "HU", "SK", "SI", "HR",
+                 "EE", "LV", "LT", "RO", "BG", "CY", "MT", "EU27_2020"]
+    j_total = eurostat.fetch_dataset(
+        "lfsa_egaps",
+        params={"geo": countries, "age": "Y15-74", "sex": "T",
+                "wstatus": "EMP", "time": str(year)},
+        max_age_hours=24,
+    )
+    j_self = eurostat.fetch_dataset(
+        "lfsa_egaps",
+        params={"geo": countries, "age": "Y15-74", "sex": "T",
+                "wstatus": "SELF", "time": str(year)},
+        max_age_hours=24,
+    )
+    total = eurostat.to_long_df(j_total).set_index("geo_code")["value"]
+    selfemp = eurostat.to_long_df(j_self).set_index("geo_code")["value"]
+    rate = (selfemp / total * 100)
+    rate.name = "rate"
+    df = rate.reset_index().rename(columns={"geo_code": "country"})
+    return df.dropna()
+
+
 def hicp_actual_rentals_index() -> pd.DataFrame:
     """HICP CP041 (Actual rentals for housing) for IE, monthly index 2015=100.
 
