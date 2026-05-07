@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Testing the "failure premium" thesis</h1>
+<p class="lede">
+A 2025 essay argued that high Irish costs reflect a structural "failure premium" —
+the price of state outsourcing rather than provision. Each numbered claim is tested
+below against public data. Verdicts are recorded as <em>refuted</em>,
+<em>partially refuted</em>, <em>confirmed</em>, <em>reframed</em>, or <em>untestable</em>.
+</p>
+
+<div class="note-box">
+<strong>Adjudication rule.</strong> A claim is refuted only when public data
+materially contradicts it. A claim is reframed when the underlying number is
+correct but the inferred mechanism is misspecified (most often: a demand
+subsidy compared to a capital programme, or a like-for-unlike international
+comparison). This page is intentionally dispassionate: where the institutional
+thesis survives a test, it is reported as such.
+</div>
+
+{% for c in claims %}
+<div class="claim-card" id="claim-{{ c.id }}">
+  <h3>Claim {{ c.id }}: {{ c.headline }}</h3>
+  <div class="claim-quote">{{ c.short_quote }}</div>
+  <p><strong>Test:</strong> {{ c.test }}</p>
+  <p><strong>Data:</strong> {{ c.data }}</p>
+  <p><strong>Verdict:</strong> <span class="verdict {{ c.verdict_class }}">{{ c.verdict }}</span></p>
+  {{ c.write_up | safe }}
+  {% if c.chart %}
+    {{ c.chart.div | safe }}
+    {{ c.chart.script | safe }}
+  {% endif %}
+</div>
+{% endfor %}
+
+<h2>How to read these verdicts collectively</h2>
+<p>
+The pattern across claims matters more than any single one. If most testable
+claims involving market services (housing rents, hotel prices, healthcare wages)
+trace to underlying labour-cost dynamics that are unexceptional given Irish wage
+levels, the failure-premium thesis is more limited than its presentation
+suggests. If a meaningful subset of claims survives — for instance the asylum
+hotel-bed cost decomposition, where the international gap is too large for
+wage differentials alone to explain — that subset deserves the policy weight.
+The verdicts page is intended as a worked example of where each story
+applies, not a debating point.
+</p>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Productivity and pay</h1>
+<p class="lede">
+The Baumol mechanism predicts that low-productivity-growth sectors see faster
+labour-cost growth than their own productivity warrants. Two tests on Irish data:
+β-convergence in hourly labour cost, and the cost-growth–productivity-gap regression.
+</p>
+
+<h2>Cross-sector dispersion over time</h2>
+{{ sigma_chart.div | safe }}
+{{ sigma_chart.script | safe }}
+
+<p>
+A flat or declining σ(log hourly cost) is consistent with wage compression across
+sectors despite divergent productivity — Baumol's economy-wide wage pull. A rising
+σ would push back on the mechanism. {{ sigma_commentary }}
+</p>
+
+<h2>β-convergence test</h2>
+{{ baumol_chart.div | safe }}
+{{ baumol_chart.script | safe }}
+
+<div class="note-box">
+<strong>Convergence regression result.</strong>
+β = {{ conv.beta_initial_log_cost }} (HC3 SE = {{ conv.se_beta }}, t = {{ conv.t_beta }},
+p = {{ conv.p_beta }}). R² = {{ conv.r2 }}, n = {{ conv.n }} sectors.
+{{ conv_interpretation }}
+</div>
+
+<h2>Headline Baumol test: cost growth vs productivity gap</h2>
+{% if prod_gap_chart %}
+{{ prod_gap_chart.div | safe }}
+{{ prod_gap_chart.script | safe }}
+
+<table class="data" style="max-width:560px">
+  <thead>
+    <tr><th>Specification</th><th class="num">γ</th><th class="num">SE</th><th class="num">t</th><th class="num">p</th><th class="num">R²</th><th class="num">n</th></tr>
+  </thead>
+  <tbody>
+    {% if baumol_test %}
+    <tr>
+      <td>Headline (drop L, T, U)</td>
+      <td class="num">{{ baumol_test.gamma }}</td>
+      <td class="num">{{ baumol_test.se }}</td>
+      <td class="num">{{ baumol_test.t }}</td>
+      <td class="num">{{ baumol_test.p }} {{ baumol_test.stars }}</td>
+      <td class="num">{{ baumol_test.r2 }}</td>
+      <td class="num">{{ baumol_test.n }}</td>
+    </tr>
+    {% endif %}
+    {% if baumol_test_ex_mnc %}
+    <tr>
+      <td>Excluding MNC-heavy (drop C, J too)</td>
+      <td class="num">{{ baumol_test_ex_mnc.gamma }}</td>
+      <td class="num">{{ baumol_test_ex_mnc.se }}</td>
+      <td class="num">{{ baumol_test_ex_mnc.t }}</td>
+      <td class="num">{{ baumol_test_ex_mnc.p }} {{ baumol_test_ex_mnc.stars }}</td>
+      <td class="num">{{ baumol_test_ex_mnc.r2 }}</td>
+      <td class="num">{{ baumol_test_ex_mnc.n }}</td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+<p class="meta">
+HC3 robust standard errors. L (real estate), T (households-as-employers) and U
+(extraterritorial) dropped throughout — both have small or imputed hours and
+artefactual productivity. CAGR window aligned to the cost series start year.
+</p>
+
+<p>{{ baumol_test_interpretation | safe }}</p>
+
+<p>
+Real GVA per hour worked is computed from Eurostat <code>nama_10_a64</code>
+(chain-linked volumes, 2020 base) divided by hours worked from
+<code>nama_10_a64_e</code>. Productivity in C (Manufacturing) and J (ICT) is
+inflated by MNC contract manufacturing and IP relocation; a robustness check
+that drops both sectors is planned in the next refresh.
+</p>
+{% else %}
+<p>
+The headline Baumol regression is not yet reported in this build because the
+productivity series did not load. The convergence test above uses cost data
+only and is reported in its place.
+</p>
+{% endif %}
+
+<h2>Stagnant vs progressive share of the wagebill</h2>
+{{ share_chart.div | safe }}
+{{ share_chart.script | safe }}
+
+<p>
+Baumol's third headline prediction — sometimes called Baumol's disease in the strict
+sense — is that the stagnant sectors' share of total compensation rises over time as
+their relative price rises and as employment reallocates toward them. {{ share_commentary }}
+</p>
+
+<h2>What's missing here</h2>
+<p>
+This page intentionally stops short of a full ULC decomposition because the
+sectoral productivity series for Ireland are heavily distorted by MNC activity
+in C (Manufacturing) and J (ICT). Eurostat <code>nama_10_a64</code> records the
+gross GVA those sectors generate domestically, but the implied labour productivity
+is not a domestic-economy number. The methods page documents the modified-GVA
+adjustment used for cross-checks; updates planned in the next refresh.
+</p>
+{% endblock %}

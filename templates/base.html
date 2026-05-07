@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ page_title }} — Baumol's cost disease in Ireland</title>
+<meta name="description" content="An empirical examination of Baumol's cost disease in the Irish economy, with claim-by-claim tests of competing institutional hypotheses.">
+<link rel="stylesheet" href="./assets/style.css">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./index.html">Baumol &amp; Ireland</a>
+    <nav>
+      <a href="./index.html"{% if page == 'index' %} class="current"{% endif %}>Overview</a>
+      <a href="./labour-costs.html"{% if page == 'labour-costs' %} class="current"{% endif %}>Labour costs</a>
+      <a href="./productivity.html"{% if page == 'productivity' %} class="current"{% endif %}>Productivity &amp; pay</a>
+      <a href="./failure-premium.html"{% if page == 'failure-premium' %} class="current"{% endif %}>Failure premium</a>
+      <a href="./methods.html"{% if page == 'methods' %} class="current"{% endif %}>Methods</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+{% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Last data refresh: <time datetime="{{ build_iso }}">{{ build_human }}</time>. Source datasets: CSO PxStat (EHQ03 and related), Eurostat dissemination API. Site rebuilds weekly.</p>
+    <p>Stephen Kinsella · <a href="https://stephenkinsella.net">stephenkinsella.net</a></p>
+  </div>
+</footer>
+</body>
+</html>

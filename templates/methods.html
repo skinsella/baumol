@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Methods and data</h1>
+<p class="lede">
+This page documents every series, every transformation, and every methodological
+choice the site relies on. The intent is full reproducibility from public
+sources without authentication.
+</p>
+
+<h2>Sources</h2>
+<table class="data">
+<thead><tr><th>Series</th><th>Code</th><th>Provider</th><th>Frequency</th><th>Refresh</th></tr></thead>
+<tbody>
+<tr><td>Earnings, Hours and Employment Costs</td><td>EHQ03</td><td>CSO PxStat</td><td>Quarterly</td><td>Weekly pull, monthly publication</td></tr>
+<tr><td>Quarterly National Accounts (GVA by sector)</td><td>NQQ27 / NA series</td><td>CSO PxStat</td><td>Quarterly</td><td>Weekly pull, quarterly publication</td></tr>
+<tr><td>Employment and hours by NACE A64</td><td>nama_10_a64_e</td><td>Eurostat</td><td>Annual</td><td>Weekly pull</td></tr>
+<tr><td>HICP — overall and selected COICOP</td><td>prc_hicp_aind</td><td>Eurostat</td><td>Annual rate of change</td><td>Weekly pull</td></tr>
+<tr><td>Labour cost index (LCI)</td><td>lc_lci_r2_a</td><td>Eurostat</td><td>Annual</td><td>Weekly pull</td></tr>
+<tr><td>Construction cost index (peer comparison)</td><td>sts_copi_a</td><td>Eurostat</td><td>Annual</td><td>Monthly pull</td></tr>
+</tbody>
+</table>
+
+<h2>Sample period</h2>
+<p>
+Quarterly labour cost data are reported from 2008Q1 onwards. The CSO predecessor
+series under NACE Rev. 1 stops at end-2007 and does not splice cleanly into
+EHECS without sector-level concordance work, so this site uses 2008Q1–latest as
+the headline window. Where annual Eurostat data extend back further (LCI from
+2000), they are used as a robustness check and noted explicitly.
+</p>
+
+<h2>Sector taxonomy</h2>
+<p>
+NACE Rev. 2 letters A21 throughout. The Baumol stagnant/progressive split used
+on the headline page is a prior, not a result of the analysis:
+</p>
+<ul>
+  <li><strong>Stagnant prior:</strong> H (Transport &amp; storage), I (Accommodation &amp; food),
+    P (Education), Q (Human health &amp; social work), R (Arts), S (Other services).</li>
+  <li><strong>Progressive prior:</strong> C (Manufacturing), J (Information &amp; communication),
+    K (Financial &amp; insurance).</li>
+</ul>
+<p>
+The regressions on the productivity page do not depend on the prior — the
+stagnant/progressive split is only used in the share-shift descriptive chart.
+</p>
+
+<h2>MNC distortion</h2>
+<p>
+Sectors C and J in Ireland are heavily affected by multinational activity:
+contract manufacturing, IP onshoring, aircraft leasing, and intra-group
+royalty flows can drive headline GVA and produce labour-productivity numbers
+that are not informative about the domestic economy. Where productivity is
+used (the regression on the productivity page), the headline specification
+excludes C and J as a robustness check; the modified GNI* / domestic-only
+adjustment from CSO is the next planned refinement.
+</p>
+
+<h2>Compensation aggregate construction</h2>
+<p>
+The aggregate compensation series displayed on the labour-costs page is
+constructed as: hourly labour cost × paid hours per week × employment × 52,
+summed across sectors. This understates total compensation of employees in
+the National Accounts by a small margin because EHECS excludes some segments
+(very small enterprises in some NACE codes; agriculture). It is used here as
+a within-CSO-EHECS aggregate where the wagebill is consistent with the hourly
+labour-cost series being plotted, not as a substitute for COE.
+</p>
+
+<h2>Failure-premium claim adjudication</h2>
+<p>
+Each claim on the failure-premium page is tested against named, public sources,
+linked from the claim card. The standard for "refuted" is that the public data
+materially contradict the claim as stated; "reframed" is reserved for claims
+whose numbers are correct but whose inferred mechanism is misspecified
+(typically: comparing a demand-side subsidy line to a capital-programme line,
+or making an international comparison without like-for-like inclusions).
+Verdicts can move on later refreshes and the site notes the date of each.
+</p>
+
+<h2>References</h2>
+<ul>
+  <li>Baumol, W. J. and Bowen, W. G. (1966). <em>Performing Arts: The Economic Dilemma.</em> Twentieth Century Fund.</li>
+  <li>Baumol, W. J. (1967). "Macroeconomics of unbalanced growth: the anatomy of urban crisis." <em>American Economic Review</em>, 57(3): 415–426.</li>
+  <li>Nordhaus, W. D. (2008). "Baumol's diseases: a macroeconomic perspective." <em>The B.E. Journal of Macroeconomics</em>, 8(1).</li>
+  <li>FitzGerald, J. (2018). "National Accounts for a global economy: the case of Ireland." ESRI Special Article.</li>
+  <li>CSO (annual). "Productivity in Ireland." Statistical release.</li>
+</ul>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Labour cost breakdown by sector</h1>
+<p class="lede">
+Where Irish labour costs sit, by NACE Rev. 2 letter sector, and how they have moved.
+Source: CSO EHQ03 (Earnings, Hours and Employment Costs Survey), {{ data_period }}.
+</p>
+
+<p>
+Hourly labour cost is the most directly Baumol-relevant series: it captures wages
+plus employer social-security contributions and other non-wage costs, normalised
+per hour worked. Quarterly data start in 2008Q1 — the pre-2008 NACE Rev. 1 series
+does not splice cleanly. NACE A (agriculture) and parts of D, E sit outside EHECS
+coverage and are omitted throughout.
+</p>
+
+<h2>Latest composition: wages vs non-wage labour cost</h2>
+{{ components_chart.div | safe }}
+{{ components_chart.script | safe }}
+
+<p>
+Sectors at the top of the bar chart are reading hot at the labour-cost margin
+relative to the rest of the economy. Read across the bar to see what fraction
+of the cost is wages and salaries vs employer SSC and other non-wage components.
+</p>
+
+<h2>Aggregate compensation by sector, time series</h2>
+{{ stacked_chart.div | safe }}
+{{ stacked_chart.script | safe }}
+
+<p>
+Compensation here is constructed: hourly labour cost × paid hours per week ×
+employment × 52, summed by sector. This is a wagebill aggregate, not a
+National Accounts compensation-of-employees measure — it tracks the same
+direction but the levels will differ from CSO COE figures by a few per cent
+(EHECS coverage gap; non-paid hours).
+</p>
+
+<h2>Hourly labour cost — sector small multiples</h2>
+{{ small_multiples.div | safe }}
+{{ small_multiples.script | safe }}
+
+<h2>Sector summary table</h2>
+<table class="data" id="sector-table">
+  <thead>
+    <tr>
+      <th>NACE</th>
+      <th>Sector</th>
+      <th class="num">Hourly cost (€) {{ table_period }}</th>
+      <th class="num">5-year CAGR (%)</th>
+      <th class="num">Share of wagebill (%)</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for r in table_rows %}
+    <tr>
+      <td><strong>{{ r.sector }}</strong></td>
+      <td>{{ r.label }}</td>
+      <td class="num">{{ r.hourly_cost }}</td>
+      <td class="num">{{ r.cagr_5y_pct }}</td>
+      <td class="num">{{ r.share_pct }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<div class="note-box">
+<strong>Reading guide.</strong> Q (Human health and social work) and P (Education)
+are the canonical Baumol-stagnant sectors and their CAGR is the headline test.
+J (ICT) and parts of C (Manufacturing) are MNC-dominated in Ireland, so their
+labour-cost dynamics partly reflect the composition of foreign-affiliate jobs
+rather than domestic productivity. The productivity-vs-pay page handles this.
+</div>
+
+<script>
+(function() {
+  // Make the summary table sortable.
+  var t = document.getElementById('sector-table');
+  if (!t) return;
+  var headers = t.querySelectorAll('thead th');
+  headers.forEach(function(h, idx) {
+    h.addEventListener('click', function() {
+      var rows = Array.from(t.tBodies[0].rows);
+      var asc = h.dataset.asc !== '1';
+      h.dataset.asc = asc ? '1' : '0';
+      rows.sort(function(a, b) {
+        var av = a.cells[idx].innerText.trim();
+        var bv = b.cells[idx].innerText.trim();
+        var an = parseFloat(av), bn = parseFloat(bv);
+        if (!isNaN(an) && !isNaN(bn)) return asc ? an - bn : bn - an;
+        return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+      rows.forEach(function(r) { t.tBodies[0].appendChild(r); });
+    });
+  });
+})();
+</script>
+{% endblock %}

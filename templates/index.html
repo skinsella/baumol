@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Baumol's cost disease in Ireland</h1>
+<p class="lede">
+Two competing stories about why Irish service-sector costs keep rising.
+This site tests both against the public data and reports the verdicts.
+</p>
+
+<p>
+The classical Baumol-Bowen account is mechanical: in a high-income economy with
+integrated labour markets, wages in low-productivity-growth sectors must rise to
+attract workers, so unit labour costs and relative prices in those sectors drift
+upward. The competing story — recently advanced in popular commentary — is
+institutional: Irish costs are inflated by rent extraction enabled by absent state
+capacity, with a recurring "failure premium" that has nothing to do with productivity.
+</p>
+
+<p>
+These are empirically distinguishable in many places. Where Irish cost growth tracks
+what Baumol mechanics predict at Ireland's wage level, the institutional story loses
+purchasing power. Where Irish costs diverge from peers controlling for wages, it gains.
+This site decomposes the gap.
+</p>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="label">σ-divergence (latest)</div>
+    <div class="value">{{ kpi.sigma_latest }}</div>
+    <div class="sub">cross-sector σ(log hourly cost), {{ kpi.sigma_period }}</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Stagnant share of wagebill</div>
+    <div class="value">{{ kpi.stagnant_share }}%</div>
+    <div class="sub">H, I, P, Q, R, S as % of total, {{ kpi.share_period }}</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Health cost CAGR (5y)</div>
+    <div class="value">{{ kpi.health_cagr }}%</div>
+    <div class="sub">hourly labour cost growth, sector Q</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Convergence β</div>
+    <div class="value">{{ kpi.beta }}</div>
+    <div class="sub">{{ kpi.beta_sig }}, n = {{ kpi.beta_n }} sectors</div>
+  </div>
+</div>
+
+<h2>Headline finding</h2>
+<p>{{ headline_paragraph | safe }}</p>
+
+<h2>Where to read next</h2>
+<ul>
+  <li><a href="./labour-costs.html">Labour costs by sector</a> — the breakdown, levels, components, and 5-year growth.</li>
+  <li><a href="./productivity.html">Productivity vs pay</a> — the Baumol regressions and unit labour cost.</li>
+  <li><a href="./failure-premium.html">Failure premium</a> — claim-by-claim tests of the institutional thesis.</li>
+  <li><a href="./methods.html">Methods and data</a> — exact tables, deflators, sample period, MNC caveats.</li>
+</ul>
+{% endblock %}
