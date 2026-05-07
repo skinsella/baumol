@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% from "_macros.html" import fig %}
+{% block content %}
+<h1>What do the data say?</h1>
+<p class="lede">
+This page integrates the evidence from the labour-cost analysis, the
+productivity regressions, the Department of Finance / ESRI replication and
+the failure-premium tests into a single answer to the question the site
+opens with: why do Irish services keep getting more expensive than goods,
+and what — if anything — should we do about it?
+</p>
+
+<h2>One question, three sources of evidence</h2>
+<p>
+Each of the four analytical pages on this site answers a different slice of
+the same underlying question. Reading them together rather than separately
+is what allows a clean answer.
+</p>
+
+<table class="data" style="max-width:760px">
+  <thead>
+    <tr><th style="width:24%">Source</th><th style="width:34%">Question it answers</th><th>What it found</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="./index.html">Front-page chart</a></td>
+      <td>Is there a price wedge to explain in the first place?</td>
+      <td>Yes. Service prices have doubled since 2000; goods prices have barely moved.</td>
+    </tr>
+    <tr>
+      <td><a href="./labour-costs.html">Labour costs</a></td>
+      <td>Where in the economy did labour get more expensive, and how much?</td>
+      <td>Hourly labour cost rose across all sectors. ICT and finance pulled fastest; transport and hospitality slowest. The level differences are large, but the growth rates were similar.</td>
+    </tr>
+    <tr>
+      <td><a href="./productivity.html">Productivity and pay</a></td>
+      <td>Did slow-productivity sectors raise pay anyway, as Baumol predicts?</td>
+      <td>The pay <em>spread</em> across sectors stayed remarkably compressed — pay across sectors moved together. But on the strict cross-section regression, slow-productivity sectors had <em>slower</em> cost growth, not faster: γ = <strong>{{ syn.gamma }}</strong> (rejects strong-form Baumol on the cost side).</td>
+    </tr>
+    <tr>
+      <td><a href="./replication.html">Replication</a></td>
+      <td>Do these patterns hold across Europe, and in price data not just labour-cost data?</td>
+      <td>Yes for prices. Replication β = <strong>{{ syn.our_price_lp }}</strong> (paper {{ syn.paper_price_lp }}); <strong>{{ syn.cross_n_sig }}/{{ syn.cross_n_total }}</strong> European countries show the same negative-and-significant price-on-productivity pattern. Ireland is in the middle of that distribution, not an outlier.</td>
+    </tr>
+    <tr>
+      <td><a href="./failure-premium.html">Failure premium</a></td>
+      <td>Are the high prices instead institutional rent extraction?</td>
+      <td>Mixed. {{ syn.fp_summary }}. The thesis is strong on procurement, weak on generalised price growth.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>The headline answer</h2>
+<p>
+Both stories are true, but they describe different things.
+</p>
+
+<p>
+<strong>The price wedge is mostly Baumol.</strong> Service prices have risen
+much faster than goods prices in Ireland — and in twelve of sixteen comparable
+European countries. The price-on-productivity regression confirms the
+mechanism: in sectors that fell behind on productivity, prices rose faster.
+This is exactly what the 1967 model predicted. The mechanism is not
+optional and not fixable — it is the mechanical consequence of being a
+high-wage economy with low productivity growth in person-to-person services.
+</p>
+
+<p>
+<strong>Specific procurement excesses are the failure premium.</strong> Where
+the State buys services through emergency or constrained procurement —
+asylum reception in hotels, agency nurses on framework rates — the per-unit
+cost gap to comparable countries is too large for wage differences to explain.
+That is institutional and is in principle fixable. It is a real story but a
+much narrower one than its presentation usually suggests.
+</p>
+
+<p>
+<strong>What it isn't.</strong> A claim that Irish service prices in general
+reflect a "failure premium" doesn't survive the data. Most of the price
+divergence is wage-driven Baumol — and most of the wage growth is
+unexceptional given Ireland's wage level relative to productivity in those
+sectors.
+</p>
+
+<h2>Where Baumol wins on the evidence</h2>
+<ul>
+  <li><strong>The price wedge itself.</strong> Services CPI 2024 is around 215
+    on a 2000=100 basis; goods CPI is around 122. No alternative explanation
+    has been advanced that survives the cross-country test.</li>
+  <li><strong>Compressed pay across sectors.</strong> The standard deviation of
+    log hourly labour cost across NACE letters has moved very little since
+    2008 ({{ syn.sigma }} most recently), while productivity diverged
+    sharply. Pay is moving together while productivity is not — the wage-pull
+    mechanism in Baumol's original model.</li>
+  <li><strong>Price-on-productivity in EU KLEMS.</strong> Negative and
+    significant in Ireland (β = {{ syn.our_price_lp }}) and in twelve of
+    sixteen European countries. The pattern is the European norm.</li>
+</ul>
+
+<h2>Where the failure-premium thesis wins on the evidence</h2>
+<ul>
+  <li><strong>IPAS hotel-bed cost differential.</strong> The €99/night-vs-€13.50
+    Netherlands gap survives any reasonable like-for-like reconciliation.
+    Wage differences between Ireland and the Netherlands are 10-25%, not
+    500%. Procurement structure is the more parsimonious explanation.</li>
+  <li><strong>Agency-nurse premium.</strong> The 2-3× ratio over permanent
+    salaries is real and not Baumol — staff are paid close to permanent
+    scales, the wedge is captured by agencies. The pattern is consistent
+    with publicly-funded health systems with constrained permanent
+    headcount; not unique to Ireland but a real cost of institutional choice.</li>
+  <li><strong>Policy mix, not policy failure.</strong> The HAP figure (€4bn
+    since 2014, "no units built") is best read not as failure of value-for-money
+    on HAP, but as a critique of where the marginal euro of housing support
+    is being routed — into demand subsidy rather than supply expansion.
+    Whether that is a Baumol-mechanism issue or a policy-choice issue
+    depends on whether you think supply could meaningfully respond at the
+    relevant margin. The construction-cost data say partially yes.</li>
+</ul>
+
+<h2>Where the failure-premium thesis loses on the evidence</h2>
+<ul>
+  <li><strong>Rent inflation pre-dating HAP.</strong> Rents started rising
+    sharply in 2013, before the HAP rollout. Standard event-study
+    identification does not yield a clean "HAP causes rents" coefficient.</li>
+  <li><strong>Hotel and restaurant prices.</strong> Two-thirds of the
+    cumulative HICP rise in Ireland for restaurants and accommodation can
+    be accounted for by wage growth in I (Accommodation and food services).
+    The IPAS contracting effect — supply withdrawn from the market — bounds
+    the residual but does not dominate it.</li>
+  <li><strong>Cross-country comparison.</strong> If high Irish service prices
+    were a uniquely Irish institutional phenomenon, Ireland should look like
+    an outlier. It doesn't. Ireland's price~productivity coefficient ranks
+    {{ syn.ie_rank }} of {{ syn.cross_n_total }} EU KLEMS countries.</li>
+</ul>
+
+<h2>What this implies for policy</h2>
+<p>
+The two stories require different responses, which is why distinguishing
+them matters.
+</p>
+
+<p>
+<strong>If the dominant mechanism is Baumol</strong> — as the price evidence
+suggests — the appropriate policy lever is service-sector productivity. That
+means investment in healthcare and education productivity (technology,
+process, training) and tolerance of relative-price drift as the unavoidable
+cost of being a high-income economy. It does <em>not</em> mean expecting
+service prices to converge with goods prices. Ageing makes this harder
+because demand for stagnant-sector services is rising.
+</p>
+
+<p>
+<strong>If the dominant mechanism in a particular cost line is failure
+premium</strong> — as the IPAS and agency-nurse evidence suggest — the
+appropriate response is procurement reform and direct state capacity. Note
+that "more state capacity" and "closing the failure premium" are the same
+thing for asylum reception (build state-owned reception centres) but
+opposing things for some healthcare staffing (the constraint there is on
+permanent headcount expansion within an existing state system).
+</p>
+
+<p>
+<strong>The shift-share decomposition</strong> shows that, so far, sector
+reallocation toward stagnant sectors has not dragged Irish aggregate
+productivity growth down. {{ syn.shift_share_summary | safe }} The leading
+indicator to watch is Hypothesis 6 — when the share of the wagebill in
+slow-productivity sectors starts rising materially in the data, the
+aggregate-productivity drag will follow.
+</p>
+
+<h2>What we still don't know</h2>
+<ul>
+  <li><strong>Domestic-only Ireland productivity.</strong> Headline TFP for
+    Irish C and J sectors is heavily distorted by MNC contract manufacturing
+    and IP onshoring. The CSO Productivity in Ireland release publishes a
+    foreign-vs-domestic split. The next site refresh will run the
+    productivity and replication regressions on the domestic-only series.</li>
+  <li><strong>Causal identification of policy-mix effects on prices.</strong>
+    The HAP-vs-rent and IPAS-vs-hotel-prices stories cry out for proper
+    event-study or difference-in-differences identification with local
+    authority or regional variation. Public data are sufficient for this in
+    principle.</li>
+  <li><strong>Reconciling the two wage-on-productivity findings.</strong> The
+    EU KLEMS replication finds wage growth uncorrelated with productivity at
+    the sectoral level (the paper's Hypothesis 5, which is what Baumol
+    assumed). Our CSO labour-cost regression finds a negative correlation.
+    The wage measure differs across the two (compensation per employee in
+    EU KLEMS vs hourly labour cost in EHQ03) and that probably explains
+    most of the gap, but not all of it.</li>
+</ul>
+
+<h2>Where to verify any of this for yourself</h2>
+<ul>
+  <li>The <a href="./methods.html">methods page</a> lists every dataset and
+    transformation.</li>
+  <li>The <a href="https://github.com/skinsella/baumol">repository</a>
+    contains every regression, every chart, and the build pipeline that
+    refreshes the data weekly.</li>
+  <li>The numbers on this synthesis page update on every site rebuild.</li>
+</ul>
+{% endblock %}

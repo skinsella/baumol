@@ -273,6 +273,20 @@ def build():
             cross_country_commentary=cross_country_commentary,
         )
 
+    syn = _build_synthesis_context(
+        sigma_df=sigma_df,
+        share_df=share_df,
+        baumol_test=reg["summary"].get("baumol_test"),
+        rep_results=(rep_data or {}).get("results"),
+        cross_country_commentary=cross_country_commentary,
+        shift_share_commentary=shift_share_commentary,
+        claims=claims,
+    )
+    if syn:
+        pages["synthesis.html"] = dict(
+            page="synthesis", page_title="Synthesis", syn=syn,
+        )
+
     for name, ctx in pages.items():
         ctx.update(common)
         tpl = env.get_template(name)
@@ -314,6 +328,77 @@ def _conv_interpretation(conv: dict) -> str:
         "heavy sectors (C, J), measurement at the letter-sector level, or "
         "a sample window dominated by large structural shocks."
     )
+
+
+def _build_synthesis_context(*, sigma_df, share_df, baumol_test,
+                              rep_results, cross_country_commentary,
+                              shift_share_commentary, claims):
+    """Pull the headline numbers used in the synthesis page from the same
+    objects already computed during this build. Returns None if anything
+    critical is missing.
+    """
+    if rep_results is None:
+        return None
+    price_lp = next((r for r in rep_results
+                      if r["outcome_key"] == "price" and r["productivity"] == "LP"), None)
+    if price_lp is None:
+        return None
+
+    import re
+    n_sig = n_total = ie_rank = None
+    if cross_country_commentary:
+        m = re.search(r"ranking (\d+) of (\d+)", cross_country_commentary)
+        if m:
+            ie_rank, n_total = int(m.group(1)), int(m.group(2))
+        m2 = re.search(r"(\d+) return a negative", cross_country_commentary)
+        if m2:
+            n_sig = int(m2.group(1))
+
+    fp_summary = "; ".join(_summarise_claim_verdicts(claims))
+
+    sigma_latest = (
+        f"{sigma_df.iloc[-1]['sigma']:.3f}"
+        if sigma_df is not None and len(sigma_df) else "n/a"
+    )
+    gamma = f"{baumol_test['gamma_prod_gap']:.3f}" if baumol_test else "n/a"
+
+    return {
+        "gamma": gamma,
+        "sigma": sigma_latest,
+        "our_price_lp": f"{price_lp['our_beta']:.3f}",
+        "paper_price_lp": f"{price_lp['paper_beta']:.3f}",
+        "cross_n_sig": n_sig if n_sig is not None else "—",
+        "cross_n_total": n_total if n_total is not None else "—",
+        "ie_rank": ie_rank if ie_rank is not None else "—",
+        "fp_summary": fp_summary,
+        "shift_share_summary": shift_share_commentary or "Shift-share decomposition reported on the replication page.",
+    }
+
+
+def _summarise_claim_verdicts(claims) -> list[str]:
+    """Collapse the seven claim cards into a one-line distribution like
+    "1 refuted, 1 reframed, 2 confirmed, 2 partial, 1 untestable"."""
+    counter: dict[str, int] = {}
+    label_map = {
+        "refuted": "refuted",
+        "reframed": "reframed",
+        "confirmed": "confirmed",
+        "partial": "partial",
+        "untestable": "untestable",
+    }
+    for c in claims:
+        cls = c.get("verdict_class", "")
+        key = label_map.get(cls, cls or "other")
+        counter[key] = counter.get(key, 0) + 1
+    order = ["confirmed", "partial", "reframed", "refuted", "untestable"]
+    out = []
+    for k in order:
+        if k in counter:
+            out.append(f"{counter[k]} {k}")
+    for k in counter:
+        if k not in order:
+            out.append(f"{counter[k]} {k}")
+    return out
 
 
 def _format_baumol_test(bt: dict | None) -> dict | None:
