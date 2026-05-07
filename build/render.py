@@ -103,6 +103,14 @@ def build():
         print(f"  HICP load failed: {e}")
         hicp_df = pd.DataFrame()
 
+    print("Loading HICP CP041 (rentals) for claim 6 verification...")
+    try:
+        from build.loaders import hicp_actual_rentals_index
+        rent_idx = hicp_actual_rentals_index()
+    except Exception as e:
+        print(f"  rent index load failed: {e}")
+        rent_idx = None
+
     print("Loading HICP services-vs-goods for headline chart...")
     try:
         sg_df = hicp_services_vs_goods_indices()
@@ -117,7 +125,7 @@ def build():
         coicop_df = pd.DataFrame()
 
     print("Building failure-premium claim cards...")
-    claims = failure_premium.all_claims(hicp_df=hicp_df)
+    claims = failure_premium.all_claims(hicp_df=hicp_df, rent_index=rent_idx)
     if not coicop_df.empty:
         for c in claims:
             if c["id"] == 7:
@@ -359,11 +367,29 @@ def _sigma_commentary(df: pd.DataFrame) -> str:
         return ""
     first, last = df.iloc[0]["sigma"], df.iloc[-1]["sigma"]
     delta = last - first
-    direction = "narrowed" if delta < 0 else "widened"
-    return (
-        f"Over the sample, σ has {direction} from {first:.3f} to {last:.3f} "
-        f"(Δ = {delta:+.3f})."
-    )
+    pct_change = (delta / first) * 100 if first != 0 else 0
+    if abs(pct_change) < 7:
+        descriptor = (
+            f"<strong>essentially flat</strong> — σ moved from {first:.3f} to "
+            f"{last:.3f} (Δ = {delta:+.3f}, {pct_change:+.1f}%). This is "
+            "consistent with Baumol's wage-pull mechanism (cross-sector pay "
+            "compression), but a flat σ on its own is also consistent with "
+            "no compression dynamic — it just means the spread is not widening."
+        )
+    elif delta < 0:
+        descriptor = (
+            f"<strong>narrowed</strong> from {first:.3f} to {last:.3f} "
+            f"(Δ = {delta:+.3f}, {pct_change:+.1f}%). This is consistent with "
+            "Baumol's wage-pull mechanism: pay in slow-productivity sectors "
+            "rose to keep up with progressive sectors, compressing the spread."
+        )
+    else:
+        descriptor = (
+            f"<strong>widened</strong> from {first:.3f} to {last:.3f} "
+            f"(Δ = {delta:+.3f}, {pct_change:+.1f}%). This pushes back on the "
+            "Baumol wage-pull mechanism on this sample."
+        )
+    return f"Over the period, σ has been {descriptor}"
 
 
 def _conv_interpretation(conv: dict) -> str:

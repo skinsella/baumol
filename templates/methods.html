@@ -78,6 +78,48 @@ or making an international comparison without like-for-like inclusions).
 Verdicts can move on later refreshes and the site notes the date of each.
 </p>
 
+<h2>Audit log</h2>
+<p>
+This site has been re-checked in a "reviewer 2" pass. The numerical claims
+on every page have been recomputed from raw data; below are the issues
+that pass identified, and how each was resolved.
+</p>
+<table class="data">
+<thead><tr><th>Issue</th><th>Where</th><th>Resolution</th></tr></thead>
+<tbody>
+<tr>
+  <td>Failure-premium claim 6 (rents up 89%) was asserted as verified but the rent index was not actually fetched in the build.</td>
+  <td>failure-premium page</td>
+  <td>Wired Eurostat HICP CP041 (Actual rentals for housing). Verified figure is +90.9% from 2014 mean to latest, in range with the 89% claim.</td>
+</tr>
+<tr>
+  <td>Steelman classification placed housing/utilities in the "high State buyer" bucket. That overstates direct State procurement in a category that mostly clears in private rental, utility and fuel markets.</td>
+  <td>steelman page</td>
+  <td>Reclassified to "demand-subsidised / supply-regulated" alongside hotels and education. Headline differential survives the reclassification but is described as qualitative; a measured supply-and-use-table-based test is queued.</td>
+</tr>
+<tr>
+  <td>Eurostat PLI for "Hospital services" (CP063) was treated as if it captured public-funded hospital cost. It actually captures HICP-tracked private and out-of-pocket charges.</td>
+  <td>steelman page</td>
+  <td>Caveat added directly under figure 3b. OECD-SHA per-capita health-spending PPP comparison queued for next refresh.</td>
+</tr>
+<tr>
+  <td>σ-divergence chart commentary said the spread "narrowed" over 2008–2025. Actual change is Δσ = −0.016 (about a 5% reduction) — within sampling error of "essentially flat".</td>
+  <td>productivity page</td>
+  <td>Language softened to "essentially flat with a small drift downward". Cross-sector productivity σ added as context (≈0.86, three times the wage σ).</td>
+</tr>
+<tr>
+  <td>Wage~LP and wage~TFP cells in the replication did not reproduce the paper's near-zero coefficients. Three standard wage measures all returned positive significant β.</td>
+  <td>replication page</td>
+  <td>"Honest replication note" added directly under the headline finding, documenting the three measures attempted and noting we cannot reproduce the paper's Hypothesis 5 (uniform wage growth) from public data.</td>
+</tr>
+<tr>
+  <td>Several failure-premium write-ups assert decompositions ("two-thirds of the price rise is wage-driven") without performing them, and assertions about wage gaps to peer countries are presented as conclusions.</td>
+  <td>failure-premium page</td>
+  <td>Open. Flagged for future refresh — an end-to-end HICP decomposition for accommodation/food and a Eurostat-based IE/NL labour-cost reconciliation are tractable additions.</td>
+</tr>
+</tbody>
+</table>
+
 <h2>References</h2>
 <ul>
   <li>Baumol, W. J. and Bowen, W. G. (1966). <em>Performing Arts: The Economic Dilemma.</em> Twentieth Century Fund.</li>

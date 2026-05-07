@@ -32,15 +32,30 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
 
-# Categorisation of PLI categories by State-buyer intensity.
+# Working categorisation of PLI categories by *institutional intensity* — the
+# extent to which the State's procurement, regulation, or supply-side policy
+# choices materially affect the consumer price recorded in HICP. This is a
+# qualitative classification, not a measured share.
+#
+# HIGH: services where consumer prices are dominated by State funding,
+# State pricing decisions, or regulated private-market dynamics that the
+# State directly shapes (PCRS pharmaceuticals, GP visit cards, two-tier
+# hospital charges, etc.).
+#
+# DEMAND-SUBSIDISED: private-market categories where Irish State demand
+# (HAP, IPAS contracting) is a meaningful share of total demand and could
+# bid up market-clearing prices.
+#
+# LOW: predominantly private-market categories where State involvement is
+# limited to general regulation or taxation common to all advanced economies.
 STATE_BUYER_HIGH = {
-    "A0106",     # Health
-    "A010603",   # Hospital services (subset)
-    "A0104",     # Housing, water, electricity, gas, fuels
+    "A0106",     # Health (PCRS, GP visit cards, dental subsidies, etc.)
+    "A010603",   # Hospital services (private-bed charges in two-tier system)
 }
 STATE_BUYER_MIXED = {
-    "A0110",     # Education
-    "A0111",     # Restaurants and hotels (IPAS effect)
+    "A0104",     # Housing, water, electricity, gas, fuels — HAP demand-subsidised, supply-regulated
+    "A0111",     # Restaurants and hotels — IPAS contracting effect on local supply
+    "A0110",     # Education — paid largely by State direct provision (private-market test)
     "P0202",     # Government services aggregate
     "P020202",   # Individual services
 }

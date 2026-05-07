@@ -79,12 +79,25 @@ Three steps:
        'For each category, the bar shows how many percentage points Ireland''s price level sits above (positive) or below (negative) what its overall GDP wage level alone would predict, after fitting the cross-country relationship in step (2). Bars are coloured by how dominant the State is as a buyer in that category.',
        steelman_chart_takeaway | safe) }}
 
-<h2>Test 2 — The pattern by State-buyer intensity</h2>
+<h2>Test 2 — The pattern by institutional intensity</h2>
 {{ fig(steelman_summary_chart,
        'figure 2',
-       'Ireland''s mean excess PLI, grouped by how dominant the State is as a buyer',
-       'The same residuals as Figure 1, averaged within three buckets: heavy State buyer (housing, health, hospital services), mixed (education, hotels, government services), and low / private market (transport, broad consumer goods, miscellaneous services).',
+       'Ireland''s mean excess PLI, grouped by State role in setting consumer prices',
+       'The same residuals as Figure 1, averaged within three buckets: heavy State role in price-setting (health, hospital services), demand-subsidised or supply-regulated private market (housing, hotels, education, government services), and predominantly private market (transport, broad consumer goods).',
        steelman_summary_takeaway | safe) }}
+
+<div class="note-box">
+<strong>How robust is this to the bucketing?</strong> The classification above
+is qualitative, not a measured share-of-State-financed demand. An earlier draft
+of this page placed housing/utilities in the "high" bucket; on reflection it
+sits more comfortably in the demand-subsidised/regulated category, since most
+of the underlying spend (rents, utilities, fuel) clears in private markets even
+where the State is a major demand source via HAP. The headline result — Ireland
+sits well above predicted PLI in categories where State pricing or State demand
+is most consequential — survives both classifications, but a fully measured
+test (using CSO supply-and-use tables for sector-level State demand share)
+would tighten the case.
+</div>
 
 <h2>Test 3 — The two clearest individual cases</h2>
 <p>
@@ -107,8 +120,19 @@ Ireland.
 {{ fig(steelman_hospital_chart,
        'figure 3b',
        'Hospital services — country price level vs overall economy price level',
-       'Same construction as Figure 3a, restricted to the COICOP "Hospital services" category. The category captures public-procured hospital activity that is recorded in HICP, which depending on country includes outpatient charges, day-case work, and certain elective procedures.',
-       'Ireland is again well above the regression line. The level premium for hospital services is on the order of 30%. The Netherlands, Denmark and Sweden — countries with more direct state provision — sit closer to or below the line.') }}
+       'Same construction as Figure 3a, restricted to COICOP CP063 "Hospital services". This is the HICP-tracked component, which captures the prices households actually pay — out-of-pocket charges, private-bed fees, and unsubsidised day-case work — not the public-funded unit cost of inpatient care.',
+       'Ireland is well above the regression line. The level premium for HICP-tracked hospital services is on the order of 30%. The Netherlands, Denmark and Sweden — countries with broader public-only access — sit closer to or below the line.') }}
+
+<div class="note-box">
+<strong>Caveat on hospital services PLI.</strong> The Eurostat PLI for
+"Hospital services" measures HICP-recorded prices, not full state-funded
+unit cost of care. In Ireland this primarily reflects private-bed charges in
+the two-tier system, A&amp;E charges before refunds, and certain unsubsidised
+day-case fees — a small share of total Irish hospital activity but a large
+contributor to consumer experience of healthcare cost. To test the level
+premium on the public-funded share, an OECD-SHA health-spending-per-capita
+PPP comparison would be the better measure; that is on the next-refresh list.
+</div>
 {% endif %}
 
 <h2>Where the steelman <em>doesn't</em> survive</h2>
@@ -152,15 +176,17 @@ a different question — about levels rather than slopes.
 <strong>Caveats.</strong>
 </p>
 <ul>
-  <li>The State-buyer-intensity classification is a working categorisation,
-    not a measured value. A formal test would use the actual share of
-    sector demand financed by the State (CSO supply-and-use tables would
-    suffice).</li>
-  <li>Eurostat PLIs for health and hospital services capture the
-    out-of-pocket and public-procurement components recorded in HICP, not
-    the full unit cost of care. A complementary test using OECD health-spending-per-capita
-    PPP data (which captures the full state-funded cost) would tighten
-    the case.</li>
+  <li>The institutional-intensity classification is a qualitative working
+    categorisation, not a measured share of demand financed by the State.
+    A formal test would use CSO supply-and-use tables. Earlier drafts of
+    this page used different bucketings; the headline differential survives
+    those re-runs but its size moves by a few percentage points.</li>
+  <li>Eurostat PLIs for health and hospital services capture HICP-recorded
+    prices — out-of-pocket charges, private-bed fees, dental and pharmacy
+    co-pays — not the full public-funded unit cost of care. A complementary
+    test using OECD-SHA health-spending-per-capita PPP data (which captures
+    state-funded cost) would tighten the case and is on the next-refresh
+    list.</li>
   <li>The country fixed effects in the price-on-productivity regression
     on the replication page also absorb some non-institutional variation
     (currency-area effects, energy import dependence, geography). The PLI

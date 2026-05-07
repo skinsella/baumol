@@ -174,6 +174,21 @@ def labour_productivity_annual(*, exclude_mnc_heavy: bool = False) -> pd.DataFra
     return m[["period", "sector", "sector_label", "prod"]].reset_index(drop=True)
 
 
+def hicp_actual_rentals_index() -> pd.DataFrame:
+    """HICP CP041 (Actual rentals for housing) for IE, monthly index 2015=100.
+
+    Used to verify failure-premium claim 6 ("rents up 89% since 2014").
+    """
+    raw = eurostat.fetch_dataset(
+        "prc_hicp_midx",
+        params={"geo": "IE", "unit": "I15", "coicop": "CP041"},
+        max_age_hours=24,
+    )
+    df = eurostat.to_long_df(raw)
+    df["period"] = pd.PeriodIndex(df["time"], freq="M")
+    return df[["period", "value"]].rename(columns={"value": "rent_index"}).sort_values("period")
+
+
 def hicp_services_vs_goods_indices() -> pd.DataFrame:
     """HICP indices (2015=100) for goods (CP_GD) and services (CP_SERV) for IE,
     monthly. Used for the services-vs-goods divergence chart that mirrors the
