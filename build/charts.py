@@ -20,6 +20,20 @@ from build.fetchers.cso import (
     STAGNANT_NACE,
     MNC_HEAVY,
 )
+from build.analysis.replication import NACE_FULL_LABELS
+
+
+def _short_label(letter: str, n_words: int = 3) -> str:
+    """Compact label that pairs a NACE letter with the leading words of the
+    full sector name. Used everywhere a chart needs a sector label longer than
+    just the letter.
+    """
+    full = NACE_FULL_LABELS.get(letter, "")
+    if not full:
+        return letter
+    head = ", ".join(full.replace("; ", ", ").split(", ")[:1])
+    head = " ".join(head.split()[:n_words]).rstrip(",.")
+    return f"{letter} · {head}"
 
 # Discrete colour palette: stagnant = warm, progressive = cool, mixed = grey
 SECTOR_COLOURS: dict[str, str] = {}
@@ -90,10 +104,11 @@ def stacked_compensation_area(long_df: pd.DataFrame, *, div_id: str = "stacked-c
 
     fig = go.Figure()
     for sec in cols:
+        label = _short_label(sec)
         fig.add_trace(go.Scatter(
-            x=[str(p) for p in comp.index], y=comp[sec], name=sec, mode="lines",
+            x=[str(p) for p in comp.index], y=comp[sec], name=label, mode="lines",
             stackgroup="one", line=dict(width=0.5, color=SECTOR_COLOURS.get(sec, "#888")),
-            hovertemplate=f"<b>{sec}</b> %{{x}}: €%{{y:.2f}}bn<extra></extra>",
+            hovertemplate=f"<b>{label}</b> %{{x}}: €%{{y:.2f}}bn<extra></extra>",
         ))
     fig.update_layout(**_layout(
         title="Aggregate annual labour compensation by NACE sector (€ bn)",
@@ -115,7 +130,8 @@ def hourly_cost_small_multiples(long_df: pd.DataFrame, *, div_id: str = "hourly-
     rows = (n + cols - 1) // cols
     from plotly.subplots import make_subplots
 
-    fig = make_subplots(rows=rows, cols=cols, subplot_titles=sectors,
+    titles = [_short_label(s) for s in sectors]
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=titles,
                         shared_xaxes=True, vertical_spacing=0.08, horizontal_spacing=0.05)
     for i, sec in enumerate(sectors):
         sd = d[d["sector"] == sec].sort_values("period")
@@ -124,7 +140,7 @@ def hourly_cost_small_multiples(long_df: pd.DataFrame, *, div_id: str = "hourly-
         fig.add_trace(go.Scatter(
             x=sd["period_str"], y=sd["value"], mode="lines",
             line=dict(color=SECTOR_COLOURS.get(sec, "#666"), width=1.5),
-            showlegend=False, hovertemplate="%{x}: €%{y:.2f}/hr<extra>" + sec + "</extra>",
+            showlegend=False, hovertemplate="%{x}: €%{y:.2f}/hr<extra>" + _short_label(sec) + "</extra>",
         ), row=r, col=c)
     fig.update_layout(**_layout(
         title="Hourly labour cost (€/hr) by sector — quarterly",
@@ -142,14 +158,15 @@ def labour_cost_components_bars(long_df: pd.DataFrame, *, div_id: str = "lc-comp
     pivot = d.pivot_table(index="sector", columns="stat", values="value")
     pivot = pivot.reindex([s for s in NACE_LETTERS_ORDER if s in pivot.index])
 
+    y_labels = [_short_label(s, n_words=4) for s in pivot.index]
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        y=pivot.index, x=pivot.get("hourly_earnings", 0), name="Wages & salaries (hourly)",
+        y=y_labels, x=pivot.get("hourly_earnings", 0), name="Wages & salaries (hourly)",
         orientation="h", marker_color="#3182bd",
         hovertemplate="<b>%{y}</b> wages: €%{x:.2f}/hr<extra></extra>",
     ))
     fig.add_trace(go.Bar(
-        y=pivot.index, x=pivot.get("hourly_other_labour_cost", 0), name="Employer SSC + other (hourly)",
+        y=y_labels, x=pivot.get("hourly_other_labour_cost", 0), name="Employer SSC + other (hourly)",
         orientation="h", marker_color="#fc8d59",
         hovertemplate="<b>%{y}</b> non-wage: €%{x:.2f}/hr<extra></extra>",
     ))
@@ -157,7 +174,7 @@ def labour_cost_components_bars(long_df: pd.DataFrame, *, div_id: str = "lc-comp
         title=f"Hourly labour cost composition by sector — {latest}",
         barmode="stack",
         xaxis_title="€/hour",
-        yaxis=dict(autorange="reversed", tickfont=dict(size=11)),
+        yaxis=dict(autorange="reversed", tickfont=dict(size=10)),
     ))
     return fig_to_html(fig, div_id=div_id, height=520)
 
@@ -234,12 +251,14 @@ def stagnant_share_chart(share_df: pd.DataFrame, *, div_id: str = "stagnant-shar
 def baumol_scatter(sectors_records: list[dict], *, div_id: str = "baumol-scatter") -> dict:
     """Cross-section scatter: cost CAGR vs initial log cost (convergence test)."""
     df = pd.DataFrame(sectors_records)
+    labels = [_short_label(s) for s in df["sector"]]
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=df["initial_log_hourly_cost"], y=df["cagr_hourly_cost"] * 100,
         mode="markers+text", text=df["sector"], textposition="top center",
+        customdata=labels,
         marker=dict(size=11, color=[SECTOR_COLOURS.get(s, "#666") for s in df["sector"]]),
-        hovertemplate="%{text}: initial €exp(%{x:.2f}), CAGR=%{y:.2f}%<extra></extra>",
+        hovertemplate="<b>%{customdata}</b><br>initial €exp(%{x:.2f}), CAGR=%{y:.2f}%<extra></extra>",
     ))
     if df.shape[0] >= 4:
         slope, intercept = np.polyfit(df["initial_log_hourly_cost"], df["cagr_hourly_cost"] * 100, 1)
@@ -255,6 +274,165 @@ def baumol_scatter(sectors_records: list[dict], *, div_id: str = "baumol-scatter
     return fig_to_html(fig, div_id=div_id, height=460)
 
 
+def hicp_services_goods_chart(df: pd.DataFrame, *,
+                                div_id: str = "hicp-svc-gd") -> dict:
+    """Replicates DFin Box 5 Figure 11A — services CPI vs goods CPI, rebased to 2000=100."""
+    df = df.copy()
+    df["category"] = df["category"].apply(lambda s: "Services" if "Services" in s else "Goods")
+    pivot = df.pivot_table(index="period", columns="category", values="index_value")
+    pivot = pivot.dropna(how="any").sort_index()
+    base = pivot[pivot.index.year == 2000].iloc[0]
+    indexed = pivot / base * 100
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=indexed.index.astype(str), y=indexed["Services"], name="Services",
+        line=dict(color="#b30000", width=2),
+        hovertemplate="%{x}: %{y:.1f}<extra>Services</extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=indexed.index.astype(str), y=indexed["Goods"], name="Goods",
+        line=dict(color="#08519c", width=2),
+        hovertemplate="%{x}: %{y:.1f}<extra>Goods</extra>",
+    ))
+    latest_svc = indexed["Services"].iloc[-1]
+    latest_gd = indexed["Goods"].iloc[-1]
+    fig.update_layout(**_layout(
+        title=f"Services vs goods HICP, Ireland, 2000=100 "
+              f"(latest: services {latest_svc:.0f}, goods {latest_gd:.0f})",
+        yaxis_title="Index, 2000=100",
+        xaxis_title=None,
+    ))
+    return fig_to_html(fig, div_id=div_id, height=400)
+
+
+def hicp_services_breakdown_chart(df: pd.DataFrame, *,
+                                    div_id: str = "hicp-coicop") -> dict:
+    """Selected service categories rebased to 2015=100 (HICP native base)."""
+    df = df.copy()
+    df["period_str"] = df["period"].astype(str)
+    fig = go.Figure()
+    palette = ["#b30000", "#e34a33", "#fc8d59", "#fdbb84", "#08519c", "#3182bd",
+               "#6baed6", "#74c476", "#525252"]
+    cats = df.sort_values("period").groupby("category_code")
+    for i, (code, group) in enumerate(cats):
+        label = group["category_label"].iloc[0]
+        latest = group.sort_values("period")["index_value"].iloc[-1]
+        fig.add_trace(go.Scatter(
+            x=group["period_str"], y=group["index_value"],
+            name=f"{label} ({latest:.0f})",
+            line=dict(color=palette[i % len(palette)], width=1.5),
+            hovertemplate=f"<b>{label}</b><br>%{{x}}: %{{y:.1f}}<extra></extra>",
+        ))
+    fig.update_layout(**_layout(
+        title="HICP service categories, Ireland, 2015=100",
+        yaxis_title="Index",
+        legend=dict(orientation="h", y=-0.3, x=0, font=dict(size=10)),
+    ))
+    return fig_to_html(fig, div_id=div_id, height=480)
+
+
+def replication_coefficient_plot(results: list[dict], *,
+                                   div_id: str = "rep-forest") -> dict:
+    """Forest-style plot of paper β vs our β, with 95% CI bars from each.
+    Two productivity measures (TFP, LP) per outcome.
+    """
+    fig = go.Figure()
+    outcomes_order = ["price", "real_gva", "nom_gva", "hours", "wages"]
+    label_map = {"price": "Price", "real_gva": "Real GVA",
+                 "nom_gva": "Nominal GVA", "hours": "Hours", "wages": "Wages"}
+    y_pos, ticks = [], []
+    yi = 0
+    for o in outcomes_order:
+        for prod in ["TFP", "LP"]:
+            r = next((x for x in results
+                      if x["outcome_key"] == o and x["productivity"] == prod), None)
+            if not r:
+                continue
+            y = -yi
+            ticks.append((y, f"{label_map[o]} ~ {prod}"))
+            yi += 1
+            fig.add_trace(go.Scatter(
+                x=[r["paper_beta"]], y=[y - 0.18],
+                mode="markers", name="DFin-ESRI 2026",
+                marker=dict(color="#08519c", size=10, symbol="diamond"),
+                error_x=dict(type="data", array=[1.96 * r["paper_se"]],
+                              color="#08519c", thickness=1.2, width=4),
+                showlegend=(yi == 1),
+                hovertemplate=f"<b>Paper</b><br>β = {r['paper_beta']:.3f} (SE {r['paper_se']:.3f})<extra></extra>",
+            ))
+            fig.add_trace(go.Scatter(
+                x=[r["our_beta"]], y=[y + 0.18],
+                mode="markers", name="This site",
+                marker=dict(color="#b30000", size=10, symbol="circle"),
+                error_x=dict(type="data", array=[1.96 * r["our_se"]],
+                              color="#b30000", thickness=1.2, width=4),
+                showlegend=(yi == 1),
+                hovertemplate=f"<b>Our replication</b><br>β = {r['our_beta']:.3f} (SE {r['our_se']:.3f})<extra></extra>",
+            ))
+
+    fig.add_vline(x=0, line=dict(color="#888", width=1, dash="dot"))
+    fig.update_layout(**_layout(
+        title="Replication coefficients vs Department of Finance / ESRI (Jan 2026), 95% CI",
+        xaxis_title="Coefficient β",
+        yaxis=dict(tickmode="array",
+                   tickvals=[t[0] for t in ticks],
+                   ticktext=[t[1] for t in ticks],
+                   showgrid=False, zeroline=False),
+        legend=dict(orientation="h", y=1.08, x=0),
+    ))
+    return fig_to_html(fig, div_id=div_id, height=560)
+
+
+def cross_country_lp_plot(df: pd.DataFrame, *,
+                            div_id: str = "cross-country-lp") -> dict:
+    """Hartwig-style cross-country comparison of the price~LP coefficient."""
+    df = df.dropna(subset=["beta"]).sort_values("beta")
+    fig = go.Figure()
+    colors = ["#b30000" if c == "IE" else "#525252" for c in df["country"]]
+    fig.add_trace(go.Bar(
+        x=df["beta"], y=df["country"], orientation="h",
+        marker=dict(color=colors),
+        error_x=dict(type="data", array=1.96 * df["se"], color="#888"),
+        hovertemplate="<b>%{y}</b><br>β = %{x:.3f}<extra></extra>",
+    ))
+    fig.add_vline(x=0, line=dict(color="#888", width=1, dash="dot"))
+    fig.update_layout(**_layout(
+        title="Price~LP coefficient by country (Baumol cost-disease test, 1997–2021)",
+        xaxis_title="β (negative = Baumol mechanism present)",
+        yaxis=dict(autorange="reversed", tickfont=dict(size=11)),
+        showlegend=False,
+    ))
+    return fig_to_html(fig, div_id=div_id, height=460)
+
+
+def shift_share_chart(actual_by_year: dict, fixed_share_means: dict, *,
+                        div_id: str = "shift-share") -> dict:
+    """Nordhaus growth-disease test: actual aggregate LP growth vs fixed-base-year
+    counterfactuals. If older base years yield higher mean growth, that is
+    Baumol-Nordhaus growth disease.
+    """
+    bases = sorted(fixed_share_means.keys())
+    values = [fixed_share_means[b]["mean_growth"] for b in bases]
+    actual_mean = actual_by_year["mean_growth"]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=[str(b) for b in bases], y=values,
+        marker_color="#3182bd",
+        name="Counterfactual (fixed shares)",
+        hovertemplate="Base year %{x}: %{y:.2f}%/yr<extra></extra>",
+    ))
+    fig.add_hline(y=actual_mean, line=dict(color="#b30000", dash="dash"),
+                   annotation_text=f"Actual mean ({actual_mean:.2f}%/yr)",
+                   annotation_position="top right")
+    fig.update_layout(**_layout(
+        title="Aggregate LP growth: actual vs fixed-base-year counterfactual (Ireland)",
+        xaxis_title="Sector-share base year",
+        yaxis_title="Mean annual LP growth, %",
+    ))
+    return fig_to_html(fig, div_id=div_id, height=380)
+
+
 def baumol_prod_gap_scatter(sectors_records: list[dict], *,
                              div_id: str = "baumol-prod-gap") -> dict:
     """The headline Baumol test: cost growth vs productivity gap.
@@ -265,14 +443,16 @@ def baumol_prod_gap_scatter(sectors_records: list[dict], *,
     df = pd.DataFrame(sectors_records).dropna(subset=["prod_gap", "cagr_hourly_cost"])
     if df.empty:
         return fig_to_html(go.Figure(), div_id=div_id, height=300)
+    labels = [_short_label(s) for s in df["sector"]]
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=df["prod_gap"] * 100, y=df["cagr_hourly_cost"] * 100,
         mode="markers+text", text=df["sector"], textposition="top center",
+        customdata=labels,
         marker=dict(size=12, color=[SECTOR_COLOURS.get(s, "#666") for s in df["sector"]],
                     line=dict(width=0.5, color="#222")),
         hovertemplate=(
-            "<b>%{text}</b><br>productivity gap (mean − own): %{x:.2f} pp/yr"
+            "<b>%{customdata}</b><br>productivity gap: %{x:.2f} pp/yr"
             "<br>cost growth: %{y:.2f}%/yr<extra></extra>"
         ),
     ))

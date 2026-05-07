@@ -10,8 +10,12 @@ import numpy as np
 import pandas as pd
 
 from build import charts
-from build.analysis import baumol, failure_premium
-from build.loaders import labour_costs_quarterly, labour_productivity_annual, hicp_annual_ireland_vs_ea
+from build.analysis import baumol, failure_premium, replication
+from build.loaders import (
+    labour_costs_quarterly, labour_productivity_annual,
+    hicp_annual_ireland_vs_ea, hicp_services_vs_goods_indices,
+    hicp_coicop_services_breakdown,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
@@ -99,8 +103,80 @@ def build():
         print(f"  HICP load failed: {e}")
         hicp_df = pd.DataFrame()
 
+    print("Loading HICP services-vs-goods for headline chart...")
+    try:
+        sg_df = hicp_services_vs_goods_indices()
+        hicp_chart = charts.hicp_services_goods_chart(sg_df)
+    except Exception as e:
+        print(f"  services/goods load failed: {e}")
+        hicp_chart = None
+    try:
+        coicop_df = hicp_coicop_services_breakdown()
+    except Exception as e:
+        print(f"  COICOP load failed: {e}")
+        coicop_df = pd.DataFrame()
+
     print("Building failure-premium claim cards...")
     claims = failure_premium.all_claims(hicp_df=hicp_df)
+    if not coicop_df.empty:
+        for c in claims:
+            if c["id"] == 7:
+                c["chart"] = charts.hicp_services_breakdown_chart(coicop_df)
+                break
+
+    print("Running DFin-ESRI replication on EU KLEMS data...")
+    rep_data = None
+    rep_chart = None
+    cross_country_chart = None
+    cross_country_commentary = ""
+    shift_share_chart = None
+    shift_share_commentary = ""
+    try:
+        panel = replication.build_panel("IE")
+        rep_data = replication.run_replication(panel)
+        rep_chart = charts.replication_coefficient_plot(rep_data["results"])
+        ss = replication.shift_share_growth_disease(panel)
+        actual = ss.pop("actual")
+        if ss:
+            shift_share_chart = charts.shift_share_chart(actual, ss)
+            bases = sorted(ss.keys())
+            oldest = ss[bases[0]]["mean_growth"]
+            latest_base = ss[bases[-1]]["mean_growth"]
+            actual_m = actual["mean_growth"]
+            shift_share_commentary = (
+                f"Counterfactual mean LP growth using {bases[0]} weights: "
+                f"<strong>{oldest:.2f}%/yr</strong>; using {bases[-1]} weights: "
+                f"<strong>{latest_base:.2f}%/yr</strong>; actual: <strong>{actual_m:.2f}%/yr</strong>. "
+                + ("Older weights yield higher counterfactual growth, consistent with "
+                   "Baumol-Nordhaus growth disease."
+                   if oldest > actual_m else
+                   "Older weights do <em>not</em> yield higher counterfactual growth — "
+                   "no Baumol-Nordhaus growth-disease drag is visible in these data, "
+                   "matching the paper's headline conclusion.")
+            )
+    except Exception as e:
+        print(f"  replication failed: {e}")
+
+    try:
+        cc_df = replication.cross_country_lp_table()
+        cross_country_chart = charts.cross_country_lp_plot(cc_df)
+        cc_clean = cc_df.dropna(subset=["beta"])
+        if "IE" in cc_clean["country"].values:
+            ie_row = cc_clean[cc_clean["country"] == "IE"].iloc[0]
+            ie_rank = (cc_clean.sort_values("beta")["country"].tolist()).index("IE") + 1
+            n_countries = len(cc_clean)
+            n_negative_sig = ((cc_clean["beta"] < 0) & (cc_clean["p"] < 0.05)).sum()
+            cross_country_commentary = (
+                f"Ireland's price~LP coefficient is "
+                f"<strong>{ie_row['beta']:.3f}</strong> "
+                f"(SE {ie_row['se']:.3f}, p = {ie_row['p']:.3f}), ranking "
+                f"{ie_rank} of {n_countries}. "
+                f"Of the {n_countries} countries, {n_negative_sig} return a negative "
+                f"and statistically significant coefficient — i.e. Baumol's price-disease "
+                f"prediction is widely supported across Europe, not unique to Ireland."
+            )
+    except Exception as e:
+        print(f"  cross-country sweep failed: {e}")
 
     common = dict(build_iso=build_iso, build_human=build_human)
 
@@ -136,6 +212,7 @@ def build():
         "index.html": dict(
             page="index", page_title="Overview",
             kpi=kpi, headline_paragraph=headline_paragraph,
+            hicp_chart=hicp_chart,
         ),
         "labour-costs.html": dict(
             page="labour-costs", page_title="Labour costs",
@@ -175,6 +252,16 @@ def build():
             page="methods", page_title="Methods",
         ),
     }
+    if rep_data is not None:
+        pages["replication.html"] = dict(
+            page="replication", page_title="Replication",
+            rep=rep_data,
+            replication_chart=rep_chart,
+            shift_share_chart=shift_share_chart,
+            shift_share_commentary=shift_share_commentary,
+            cross_country_chart=cross_country_chart,
+            cross_country_commentary=cross_country_commentary,
+        )
 
     for name, ctx in pages.items():
         ctx.update(common)

@@ -174,6 +174,64 @@ def labour_productivity_annual(*, exclude_mnc_heavy: bool = False) -> pd.DataFra
     return m[["period", "sector", "sector_label", "prod"]].reset_index(drop=True)
 
 
+def hicp_services_vs_goods_indices() -> pd.DataFrame:
+    """HICP indices (2015=100) for goods (CP_GD) and services (CP_SERV) for IE,
+    monthly. Used for the services-vs-goods divergence chart that mirrors the
+    Department of Finance Box 5 Figure 11A.
+
+    Returns columns: period (Period[M]), category ('Goods' or 'Services'), index_value.
+    """
+    raw = eurostat.fetch_dataset(
+        "prc_hicp_midx",
+        params={
+            "geo": "IE",
+            "unit": "I15",
+            "coicop": ["GD", "SERV"],
+        },
+        max_age_hours=24,
+    )
+    df = eurostat.to_long_df(raw)
+    df["period"] = pd.PeriodIndex(df["time"], freq="M")
+    df = df.rename(columns={"coicop": "category", "value": "index_value"})
+    df["category"] = df["category"].replace({
+        "Goods": "Goods", "Services": "Services",
+    })
+    return df[["period", "category", "index_value"]].sort_values("period")
+
+
+def hicp_coicop_services_breakdown() -> pd.DataFrame:
+    """HICP indices for selected COICOP services categories on the DFin Box 5
+    footnote list — health insurance, postal, package holidays, medical
+    services, total services, restaurants, accommodation. Monthly.
+    """
+    SERVICE_COICOPS = {
+        "SERV":   "Total services",
+        "CP044":  "Water, refuse and other dwelling services",
+        "CP063":  "Hospital services",
+        "CP073":  "Transport services",
+        "CP09":   "Recreation and culture",
+        "CP096":  "Package holidays",
+        "CP11":   "Restaurants and hotels",
+        "CP111":  "Catering services",
+        "CP1112": "Accommodation services",
+    }
+    raw = eurostat.fetch_dataset(
+        "prc_hicp_midx",
+        params={
+            "geo": "IE",
+            "unit": "I15",
+            "coicop": list(SERVICE_COICOPS.keys()),
+        },
+        max_age_hours=24,
+    )
+    df = eurostat.to_long_df(raw)
+    df["period"] = pd.PeriodIndex(df["time"], freq="M")
+    code_col = "coicop_code" if "coicop_code" in df.columns else "coicop"
+    df["category_code"] = df[code_col]
+    df["category_label"] = df["category_code"].map(SERVICE_COICOPS).fillna(df.get("coicop", df["category_code"]))
+    return df[["period", "category_code", "category_label", "value"]].rename(columns={"value": "index_value"})
+
+
 def hicp_annual_ireland_vs_ea() -> pd.DataFrame:
     """HICP overall and selected COICOP for IE vs EA19/EA20, annual rate of change.
 

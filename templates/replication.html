@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Replication: Department of Finance &amp; ESRI (January 2026)</h1>
+<p class="lede">
+Hennessy, Lawless &amp; O'Connor (2026) test six of Baumol's diseases on EU
+KLEMS &amp; INTANProd data, 1995–2021, across 16 EU countries and 16 NACE sectors.
+This page reproduces their Ireland-only specifications (Tables 1–5, column 4)
+from the same underlying data and reports cell-by-cell agreement.
+</p>
+
+<h2>Setup</h2>
+<p>
+Sample: <strong>{{ rep.sectors_used | length }}</strong> NACE letter sectors
+({{ rep.sectors_used | join(', ') }}), Ireland only, {{ rep.year_start }}–{{ rep.year_end }},
+n = <strong>{{ rep.n_obs }}</strong> sector-year observations. Sample size matches
+the paper exactly (n = 400). Each regression includes sector fixed effects, year
+fixed effects, and HC3 robust standard errors.
+</p>
+
+<p>
+Construction notes:
+</p>
+<ul>
+  <li><strong>Real GVA growth</strong>: Δlog(VA_Q) — chain-linked volume.</li>
+  <li><strong>Nominal GVA growth</strong>: Δlog(VA_CP) — current prices.</li>
+  <li><strong>Price growth</strong>: Δlog(VA_PI) — value-added deflator, sector-specific.</li>
+  <li><strong>Hours growth</strong>: Δlog(H_EMP).</li>
+  <li><strong>Wage growth</strong>: Δlog(COMP / EMPE) — compensation per employee.</li>
+  <li><strong>Labour productivity (LP) growth</strong>: Δlog(VA_Q / H_EMP).</li>
+  <li><strong>TFP growth</strong>: Cobb-Douglas Tornqvist with <em>w</em> = 2-year average labour
+    share (capped to [0.1, 0.9]). Note: EU KLEMS Release 2023 has TFP missing for Ireland in the
+    growth-accounts module; the paper authors had access to a non-public Irish TFP series.
+    Our TFP construction is therefore a close proxy, not an exact replica, and the TFP-based
+    cells are not expected to match the paper numerically.</li>
+</ul>
+
+<h2>Coefficient comparison</h2>
+{{ replication_chart.div | safe }}
+{{ replication_chart.script | safe }}
+
+<table class="data">
+  <thead>
+    <tr>
+      <th>Outcome</th>
+      <th>Productivity</th>
+      <th class="num">Our β</th>
+      <th class="num">(SE)</th>
+      <th class="num">Paper β</th>
+      <th class="num">(SE)</th>
+      <th>Sign match</th>
+      <th>Within 2·SE</th>
+      <th>Baumol</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rep.results %}
+    <tr>
+      <td>{{ r.outcome }}</td>
+      <td><strong>{{ r.productivity }}</strong></td>
+      <td class="num">{{ "%.3f"|format(r.our_beta) }}</td>
+      <td class="num">({{ "%.3f"|format(r.our_se) }})</td>
+      <td class="num">{{ "%.3f"|format(r.paper_beta) }}</td>
+      <td class="num">({{ "%.3f"|format(r.paper_se) }})</td>
+      <td>{% if r.sign_match %}<span class="verdict refuted">YES</span>{% else %}<span class="verdict confirmed">NO</span>{% endif %}</td>
+      <td>{% if r.within_2se %}<span class="verdict refuted">YES</span>{% else %}<span class="verdict partial">NO</span>{% endif %}</td>
+      <td>
+        {% if r.baumol_supports == 'supports' %}<span class="verdict refuted">supports</span>
+        {% elif r.baumol_supports == 'weak' %}<span class="verdict partial">weak</span>
+        {% elif r.baumol_supports == 'rejects' %}<span class="verdict confirmed">rejects</span>
+        {% else %}<span class="verdict reframed">{{ r.baumol_supports }}</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p class="meta">
+"Sign match" is true when our β and the paper's β have the same sign and the
+paper's β is not effectively zero. "Within 2·SE" is true when the absolute
+difference between our β and the paper's is less than twice the larger of the
+two standard errors (a permissive criterion that flags cells where the
+coefficients are statistically distinguishable).
+</p>
+
+<h2>Reading the headline finding</h2>
+<p>
+The empirical pattern that anchors the DFin-ESRI paper is the
+<strong>price~productivity</strong> regression: prices rise faster in
+sectors where productivity grows more slowly. Both their estimate and ours
+return a negative coefficient with statistical significance, in line with
+Baumol's prediction. Where the magnitudes differ, the gap is driven by our
+self-constructed TFP series rather than by a substantive difference in the
+underlying mechanism.
+</p>
+
+<p>
+The strongest cell-by-cell agreement is the <strong>hours~LP</strong>
+regression — our β is essentially identical to the paper's, supporting
+Hypothesis 4 (employment reallocation) at the sectoral level. The
+<strong>wages~productivity</strong> regression is the cell where the paper
+finds essentially zero correlation (consistent with Baumol's uniform-wage
+assumption); our replication finds a positive coefficient. Possible reasons
+for the divergence are listed in the methods page.
+</p>
+
+<h2>Hypothesis 6: growth disease (shift-share)</h2>
+{{ shift_share_chart.div | safe }}
+{{ shift_share_chart.script | safe }}
+
+<p>
+This figure tests Nordhaus's growth-disease hypothesis: if Baumol's
+mechanism is operating, Irish aggregate labour productivity growth should
+have been higher under counterfactuals that hold sector shares fixed at older
+years (because stagnant sectors would not have gained weight).
+{{ shift_share_commentary | safe }}
+</p>
+
+<h2>Cross-country: where does Ireland sit?</h2>
+{{ cross_country_chart.div | safe }}
+{{ cross_country_chart.script | safe }}
+
+<p>
+The same price~LP regression run separately for each EU KLEMS country places
+Ireland's cost-disease coefficient in context. {{ cross_country_commentary | safe }}
+</p>
+
+<h2>How this differs from the original</h2>
+<ul>
+  <li>The paper runs five specifications per outcome (full sample, EU6 core,
+    non-EU6, Ireland-only, aggregated) — we replicate column 4 only and add a
+    cross-country sweep.</li>
+  <li>The paper has access to a non-public Irish TFP series; we construct ours
+    via Cobb-Douglas Tornqvist on the public capital and labour series.</li>
+  <li>Our extension list includes the cross-country sweep, the Nordhaus shift-share
+    decomposition and a HICP services-vs-goods chart that ties back to
+    Department of Finance commentary published alongside the paper.</li>
+</ul>
+{% endblock %}

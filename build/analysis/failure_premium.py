@@ -1,4 +1,4 @@
-"""Tests of specific claims advanced in a 2025 essay arguing that high Irish
+"""Tests of specific claims advanced in a 2026 essay arguing that high Irish
 costs reflect a "failure premium" — rent-extraction enabled by absent state
 capacity, distinct from any productivity-wage mechanism.
 

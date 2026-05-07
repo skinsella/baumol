@@ -1,4 +1,5 @@
 data/cache/
+data/raw_euklems/
 dist/
 __pycache__/
 *.pyc
