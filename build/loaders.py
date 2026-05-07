@@ -232,6 +232,31 @@ def hicp_coicop_services_breakdown() -> pd.DataFrame:
     return df[["period", "category_code", "category_label", "value"]].rename(columns={"value": "index_value"})
 
 
+def eurostat_pli_panel(year: int = 2024) -> pd.DataFrame:
+    """Eurostat Price Level Indices, EU27_2020 = 100, by COICOP category.
+
+    Used by the steelman page. Returns long form: country, category_code,
+    category_label, pli.
+    """
+    countries = ["IE", "DE", "FR", "NL", "BE", "DK", "SE", "AT", "FI", "LU",
+                 "ES", "IT", "EL", "PT", "PL", "CZ", "UK", "EU27_2020", "EA20"]
+    cats = ["GDP", "A01", "A0104", "A0106", "A010603",
+            "A0107", "A010703", "A0110", "A0111", "A0112",
+            "P02", "P0201", "P0202", "P020202"]
+    raw = eurostat.fetch_dataset(
+        "prc_ppp_ind",
+        params={"geo": countries, "na_item": "PLI_EU27_2020",
+                "time": str(year), "ppp_cat": cats},
+        max_age_hours=24,
+    )
+    df = eurostat.to_long_df(raw)
+    df = df.rename(columns={"geo_code": "country",
+                             "ppp_cat_code": "category_code",
+                             "ppp_cat": "category_label",
+                             "value": "pli"})
+    return df[["country", "category_code", "category_label", "pli"]]
+
+
 def hicp_annual_ireland_vs_ea() -> pd.DataFrame:
     """HICP overall and selected COICOP for IE vs EA19/EA20, annual rate of change.
 

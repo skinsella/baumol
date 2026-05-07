@@ -433,6 +433,124 @@ def shift_share_chart(actual_by_year: dict, fixed_share_means: dict, *,
     return fig_to_html(fig, div_id=div_id, height=380)
 
 
+def steelman_excess_pli_chart(residuals_df: pd.DataFrame,
+                                country: str = "IE", *,
+                                div_id: str = "steelman-excess") -> dict:
+    """Headline steelman chart: bars of category-by-category excess PLI for
+    Ireland (after controlling for GDP-level prices), coloured by State-buyer
+    intensity.
+    """
+    df = residuals_df[residuals_df["country"] == country].copy()
+    df = df.sort_values("pli_excess_pct", ascending=True)
+    colour_map = {"high": "#b30000", "mixed": "#fdbb84",
+                  "low": "#525252", "other": "#bdbdbd"}
+    colors = [colour_map[b] for b in df["state_buyer"]]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=df["pli_excess_pct"], y=df["category_label"], orientation="h",
+        marker_color=colors,
+        hovertemplate=("<b>%{y}</b><br>"
+                       "Actual PLI: %{customdata[0]:.1f}<br>"
+                       "Excess vs predicted: %{x:+.1f}%<br>"
+                       "State-buyer intensity: %{customdata[1]}<extra></extra>"),
+        customdata=df[["pli", "state_buyer"]].values,
+        showlegend=False,
+    ))
+    fig.add_vline(x=0, line=dict(color="#888", width=1, dash="dot"))
+    for label, code in [("Heavy State buyer", "high"),
+                         ("Mixed", "mixed"),
+                         ("Low / private market", "low")]:
+        fig.add_trace(go.Scatter(
+            x=[None], y=[None], mode="markers",
+            marker=dict(color=colour_map[code], size=12),
+            name=label, showlegend=True,
+        ))
+    fig.update_layout(**_layout(
+        title=f"Ireland's price level vs what GDP alone predicts, by category (2024)",
+        xaxis_title="Excess over wage-predicted price level, %",
+        yaxis=dict(autorange="reversed", tickfont=dict(size=11)),
+        legend=dict(orientation="h", y=-0.18, x=0),
+    ))
+    return fig_to_html(fig, div_id=div_id, height=540)
+
+
+def steelman_pli_scatter(panel: pd.DataFrame, category_code: str,
+                          category_label: str, *,
+                          div_id: str = "steelman-scatter") -> dict:
+    """Cross-country scatter: x = GDP PLI, y = category PLI. Ireland highlighted.
+
+    The diagonal-ish line of best fit shows what each country's category PLI
+    would be if explained only by its overall wage/price level. Distance
+    above the line is the country-specific level premium for that category.
+    """
+    df = panel[panel["category_code"].isin(["GDP", category_code])]
+    pivot = df.pivot_table(index="country", columns="category_code", values="pli")
+    pivot = pivot.dropna(subset=["GDP", category_code])
+    pivot = pivot.drop(["EU27_2020", "EA20"], errors="ignore")
+
+    fig = go.Figure()
+    colors = ["#b30000" if c == "IE" else "#525252" for c in pivot.index]
+    sizes = [16 if c == "IE" else 9 for c in pivot.index]
+    fig.add_trace(go.Scatter(
+        x=pivot["GDP"], y=pivot[category_code],
+        mode="markers+text",
+        text=pivot.index, textposition="top right",
+        textfont=dict(size=10),
+        marker=dict(color=colors, size=sizes, line=dict(width=0.5, color="#222")),
+        hovertemplate="<b>%{text}</b><br>GDP PLI %{x:.1f}<br>Category PLI %{y:.1f}<extra></extra>",
+    ))
+
+    if pivot.shape[0] >= 4:
+        x = np.log(pivot["GDP"].values)
+        y = np.log(pivot[category_code].values)
+        slope, intercept = np.polyfit(x, y, 1)
+        xs = np.linspace(pivot["GDP"].min(), pivot["GDP"].max(), 50)
+        ys = np.exp(intercept + slope * np.log(xs))
+        fig.add_trace(go.Scatter(
+            x=xs, y=ys, mode="lines",
+            line=dict(color="#08519c", dash="dash", width=1.5),
+            name=f"OLS fit (elasticity={slope:.2f})", hoverinfo="skip",
+        ))
+
+    fig.update_layout(**_layout(
+        title=f"{category_label}: country price level vs overall GDP price level (2024)",
+        xaxis_title="GDP price level (EU27 = 100)",
+        yaxis_title=f"{category_label} price level (EU27 = 100)",
+        showlegend=True,
+    ))
+    return fig_to_html(fig, div_id=div_id, height=460)
+
+
+def steelman_summary_chart(summary: dict, *, div_id: str = "steelman-summary") -> dict:
+    """Single-panel grouped bar chart: mean excess PLI by State-buyer bucket."""
+    buckets_order = ["high", "mixed", "low"]
+    labels = {"high": "Heavy State buyer", "mixed": "Mixed",
+              "low": "Low / private market"}
+    colors = {"high": "#b30000", "mixed": "#fdbb84", "low": "#525252"}
+    xs, ys, ns, cs = [], [], [], []
+    for b in buckets_order:
+        if b in summary:
+            xs.append(labels[b])
+            ys.append(summary[b]["mean"])
+            ns.append(summary[b]["n"])
+            cs.append(colors[b])
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=xs, y=ys, marker_color=cs,
+        text=[f"+{y:.1f}%<br>(n={n} categories)" for y, n in zip(ys, ns)],
+        textposition="outside",
+        hovertemplate="<b>%{x}</b><br>mean excess PLI: %{y:+.1f}%<extra></extra>",
+    ))
+    fig.add_hline(y=0, line=dict(color="#888", width=1))
+    fig.update_layout(**_layout(
+        title="Ireland's mean excess PLI by State-buyer intensity",
+        yaxis_title="Mean excess over GDP-predicted PLI, %",
+        showlegend=False,
+    ))
+    return fig_to_html(fig, div_id=div_id, height=380)
+
+
 def baumol_prod_gap_scatter(sectors_records: list[dict], *,
                              div_id: str = "baumol-prod-gap") -> dict:
     """The headline Baumol test: cost growth vs productivity gap.

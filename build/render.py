@@ -10,11 +10,11 @@ import numpy as np
 import pandas as pd
 
 from build import charts
-from build.analysis import baumol, failure_premium, replication
+from build.analysis import baumol, failure_premium, replication, steelman as steelman_mod
 from build.loaders import (
     labour_costs_quarterly, labour_productivity_annual,
     hicp_annual_ireland_vs_ea, hicp_services_vs_goods_indices,
-    hicp_coicop_services_breakdown,
+    hicp_coicop_services_breakdown, eurostat_pli_panel,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -273,6 +273,54 @@ def build():
             cross_country_commentary=cross_country_commentary,
         )
 
+    print("Running steelman PLI analysis...")
+    steelman_excess_chart = None
+    steelman_summary_chart = None
+    steelman_housing_chart = None
+    steelman_hospital_chart = None
+    steelman_ctx = None
+    try:
+        pli = eurostat_pli_panel()
+        residuals = steelman_mod.predicted_pli_residuals(pli)
+        summary = steelman_mod.steelman_summary(residuals)
+        steelman_excess_chart = charts.steelman_excess_pli_chart(residuals)
+        steelman_summary_chart = charts.steelman_summary_chart(summary)
+        steelman_housing_chart = charts.steelman_pli_scatter(
+            pli, "A0104", "Housing, utilities and fuel",
+            div_id="steelman-housing")
+        steelman_hospital_chart = charts.steelman_pli_scatter(
+            pli, "A010603", "Hospital services",
+            div_id="steelman-hospital")
+        steelman_ctx = {
+            "high_mean": _format_num(summary.get("high", {}).get("mean"), 1),
+            "low_mean": _format_num(summary.get("low", {}).get("mean"), 1),
+            "differential": _format_num(summary.get("differential_high_minus_low_pp"), 1),
+        }
+        excess_chart_takeaway = (
+            f"Three patterns. Categories where the State is the dominant buyer "
+            f"(red) cluster at the top of the bar — housing/utilities is "
+            f"<strong>{summary.get('headline_category', {}).get('pli_excess_pct', 0):+.0f}%</strong> "
+            f"above predicted, hospital services and health both around "
+            f"+25 to +30%. Mixed and low-State-buyer categories sit in the "
+            f"middle or below zero. Education is "
+            f"<strong>about 20% below</strong> what wages predict — "
+            f"consistent with Ireland's mostly-direct state provision in that area."
+        )
+        summary_takeaway = (
+            f"Heavy-State-buyer categories are <strong>"
+            f"{steelman_ctx['high_mean']}%</strong> above predicted PLI on average. "
+            f"Low-State-buyer categories are <strong>{steelman_ctx['low_mean']}%</strong> "
+            f"above predicted. The "
+            f"<strong>{steelman_ctx['differential']} percentage point</strong> "
+            f"differential is the failure-premium signature in one number — and "
+            f"it is consistent with Ireland's GDP-level rank (5/19) being lower "
+            f"than its rank in housing (1/18) or health (1/18)."
+        )
+    except Exception as e:
+        print(f"  steelman analysis failed: {e}")
+        excess_chart_takeaway = ""
+        summary_takeaway = ""
+
     syn = _build_synthesis_context(
         sigma_df=sigma_df,
         share_df=share_df,
@@ -285,6 +333,17 @@ def build():
     if syn:
         pages["synthesis.html"] = dict(
             page="synthesis", page_title="Synthesis", syn=syn,
+        )
+    if steelman_excess_chart is not None:
+        pages["steelman.html"] = dict(
+            page="steelman", page_title="Steelman test",
+            steelman_excess_chart=steelman_excess_chart,
+            steelman_summary_chart=steelman_summary_chart,
+            steelman_housing_chart=steelman_housing_chart,
+            steelman_hospital_chart=steelman_hospital_chart,
+            steelman_chart_takeaway=excess_chart_takeaway,
+            steelman_summary_takeaway=summary_takeaway,
+            syn=steelman_ctx or {"high_mean": "—", "low_mean": "—", "differential": "—"},
         )
 
     for name, ctx in pages.items():

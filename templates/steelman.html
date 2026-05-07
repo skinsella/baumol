@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% from "_macros.html" import fig %}
+{% block content %}
+<h1>The steelman case for the failure premium — and the evidence</h1>
+<p class="lede">
+The institutional thesis that Ireland's high prices reflect a "failure
+premium" looks weak when tested against generalised consumer-price growth.
+But there is a sharper version of the same argument that is harder to
+dismiss. This page sets out the steelman thesis and tests it against
+public Eurostat data.
+</p>
+
+<h2>Why the original framing fails — and the sharper version that doesn't</h2>
+<p>
+The failure-premium argument as usually stated says: <em>Irish service
+prices are high because the State has chosen to outsource what it should
+provide directly, and that outsourcing produces rent extraction by private
+suppliers</em>. Tested against generalised price growth, that claim mostly
+fails — service prices have risen at roughly the same rate across most
+European countries, the price-on-productivity coefficient is European-typical
+in Ireland, and most of the within-Ireland price growth in services traces
+to wage growth that is unexceptional given Irish wage levels. The slope is
+Baumol.
+</p>
+<p>
+The steelman version is structurally different. It says:
+</p>
+
+<div class="note-box">
+  <strong>Steelman thesis.</strong>
+  Baumol explains the slope. The failure premium explains the intercept.
+  Service prices in every advanced economy drift up faster than goods prices —
+  that is mechanical. But the <em>level</em> at which Irish service prices sit,
+  for any given national wage level, is institutionally determined. Where the
+  State is the dominant buyer of a service and lacks in-house production
+  capacity, Irish unit costs run materially higher than peer-country
+  benchmarks even after wage adjustment. That gap is the failure premium,
+  and it is real.
+</div>
+
+<p>
+This is a sharper claim because it is consistent with most of the data the
+rest of the site shows. It does not need to refute the European-typical
+price-on-productivity coefficient. It locates the institutional damage
+specifically in the <em>level</em>, which the cross-country regressions on
+the replication page absorb into country fixed effects by construction.
+</p>
+
+<h2>How to test it</h2>
+<p>
+Eurostat publishes Price Level Indices (PLIs) for individual COICOP
+categories. A PLI of 100 means the country's prices in that category equal
+the EU27 average; 150 means 50% more expensive. Crucially, PLIs are
+PPP-adjusted level measures — they let us ask, of two countries, "even
+though one has higher wages, are its prices in <em>this</em> category
+higher than that wage gap explains?".
+</p>
+<p>
+Three steps:
+</p>
+<ol>
+  <li>For each EU country, take its PLI for the overall economy (GDP PLI).
+    This proxies the country's general wage and price level.</li>
+  <li>For each detailed category — health, hospital services, housing,
+    education, transport, hotels, etc. — regress the country's PLI for that
+    category on the country's GDP PLI across the European panel. The
+    fitted relationship tells you what each category's PLI should be at
+    each wage level.</li>
+  <li>The residual — actual PLI minus predicted — is the country's
+    institutional level premium for that category. If Ireland's residual
+    is large in heavily State-procurement-dependent categories and ~0 in
+    private-market categories, the steelman has empirical support.</li>
+</ol>
+
+<h2>Test 1 — Where Ireland sits on each category</h2>
+{{ fig(steelman_excess_chart,
+       'figure 1',
+       'Ireland''s excess price level by category, 2024',
+       'For each category, the bar shows how many percentage points Ireland''s price level sits above (positive) or below (negative) what its overall GDP wage level alone would predict, after fitting the cross-country relationship in step (2). Bars are coloured by how dominant the State is as a buyer in that category.',
+       steelman_chart_takeaway | safe) }}
+
+<h2>Test 2 — The pattern by State-buyer intensity</h2>
+{{ fig(steelman_summary_chart,
+       'figure 2',
+       'Ireland''s mean excess PLI, grouped by how dominant the State is as a buyer',
+       'The same residuals as Figure 1, averaged within three buckets: heavy State buyer (housing, health, hospital services), mixed (education, hotels, government services), and low / private market (transport, broad consumer goods, miscellaneous services).',
+       steelman_summary_takeaway | safe) }}
+
+<h2>Test 3 — The two clearest individual cases</h2>
+<p>
+The two categories where Ireland's level premium is largest are housing
+and hospital services. Each is plotted below against the cross-country
+regression line. Distance above the line is the country's level premium
+for that category — what the steelman predicts will be unusually high in
+Ireland.
+</p>
+
+{% if steelman_housing_chart %}
+{{ fig(steelman_housing_chart,
+       'figure 3a',
+       'Housing, utilities and fuel — country price level vs overall economy price level',
+       'One dot per country. Horizontal axis: country''s overall GDP price level (EU27 = 100). Vertical axis: country''s price level for housing, utilities and fuel. Dashed line is the cross-country regression — what each country''s housing price level would be if explained only by its overall wage level.',
+       'Ireland (red) sits substantially above the line. Even controlling for general wage level, Irish housing-and-utilities prices are about a third higher than the European panel predicts. This is the largest level premium in the dataset.') }}
+{% endif %}
+
+{% if steelman_hospital_chart %}
+{{ fig(steelman_hospital_chart,
+       'figure 3b',
+       'Hospital services — country price level vs overall economy price level',
+       'Same construction as Figure 3a, restricted to the COICOP "Hospital services" category. The category captures public-procured hospital activity that is recorded in HICP, which depending on country includes outpatient charges, day-case work, and certain elective procedures.',
+       'Ireland is again well above the regression line. The level premium for hospital services is on the order of 30%. The Netherlands, Denmark and Sweden — countries with more direct state provision — sit closer to or below the line.') }}
+{% endif %}
+
+<h2>Where the steelman <em>doesn't</em> survive</h2>
+<p>
+Education is the cleanest negative result. Ireland's education PLI is
+<strong>20% below</strong> what the regression predicts for its wage level.
+That is consistent with the steelman's central claim: education in Ireland
+is more directly state-provided than health (free primary, secondary,
+public-funded university), so the procurement-induced level premium does
+not arise. The pattern across categories — high excess where the State
+procures, low excess where the State directly provides — is precisely what
+the steelman predicts.
+</p>
+
+<p>
+Restaurants and hotels show only a 6% excess. The IPAS hotel-bed
+contracting argument therefore only weakly survives this test at the
+national level. That is consistent with the failure-premium page's earlier
+finding: most of the hotel-price rise is wage-driven Baumol; the
+institutional channel exists but is small relative to the wage component
+in headline data. Local-area data would be needed to test whether the
+effect is concentrated in specific markets.
+</p>
+
+<h2>So is the steelman supported by the evidence?</h2>
+<p>
+Yes, with caveats.
+</p>
+
+<p>
+<strong>Supporting.</strong> The differential between heavy-State-buyer
+categories ({{ syn.high_mean }}% mean excess PLI) and low-State-buyer
+categories ({{ syn.low_mean }}% mean excess PLI) is
+<strong>{{ syn.differential }} percentage points</strong>.
+That gap is the empirical content of the steelman. It survives the test
+that the original failure-premium argument did not, because it is asking
+a different question — about levels rather than slopes.
+</p>
+
+<p>
+<strong>Caveats.</strong>
+</p>
+<ul>
+  <li>The State-buyer-intensity classification is a working categorisation,
+    not a measured value. A formal test would use the actual share of
+    sector demand financed by the State (CSO supply-and-use tables would
+    suffice).</li>
+  <li>Eurostat PLIs for health and hospital services capture the
+    out-of-pocket and public-procurement components recorded in HICP, not
+    the full unit cost of care. A complementary test using OECD health-spending-per-capita
+    PPP data (which captures the full state-funded cost) would tighten
+    the case.</li>
+  <li>The country fixed effects in the price-on-productivity regression
+    on the replication page also absorb some non-institutional variation
+    (currency-area effects, energy import dependence, geography). The PLI
+    test inherits this and the country fixed effect is therefore an
+    upper bound on the failure-premium component.</li>
+  <li>Outsourcing is endogenous. Countries that have weaker in-house state
+    capacity may also be countries where private-market service costs are
+    high for unrelated reasons. A causal test would need a within-country
+    policy switch — the rare cases where Ireland directly provided rather
+    than procured a service for a defined period.</li>
+</ul>
+
+<h2>What this changes about the bottom line</h2>
+<p>
+The synthesis page's headline conclusion stands but is now more nuanced.
+The price wedge between services and goods is mostly a Baumol mechanism,
+visible across Europe and not specifically Irish. But within that
+European-typical pattern, Ireland sits at the top of the distribution for
+the level of state-procured services — by 25 to 30% — and that gap is the
+empirical content of the failure-premium argument. The institutional
+critique of Irish public procurement is empirically supported, narrower
+than its original framing suggests, and important.
+</p>
+
+<p>
+The policy implication compounds: <strong>productivity policy</strong> can
+attenuate the slope (slow the drift) and <strong>procurement reform with
+direct state capacity</strong> can attenuate the intercept (lower the
+level). They are complementary, not substitutes. The numbers say both
+levers matter and that the second has been under-used in Ireland.
+</p>
+{% endblock %}
