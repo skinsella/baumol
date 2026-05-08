@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 import shutil
 from pathlib import Path
 
@@ -391,6 +392,17 @@ def build():
         out = DIST / name
         out.write_text(tpl.render(**ctx))
         print(f"  wrote {out.relative_to(ROOT)}")
+
+    # Optional password-gating: if SITE_PASSWORD is set, AES-GCM-encrypt every
+    # rendered HTML file. Each page becomes a small wrapper that prompts for
+    # the password and decrypts in the browser.
+    site_password = os.environ.get("SITE_PASSWORD")
+    if site_password:
+        from build import encrypt as _encrypt
+        summary = _encrypt.encrypt_dist(DIST, site_password)
+        print(f"  encrypted {summary['count']} HTML files (PBKDF2 iters = {summary['iterations']})")
+    else:
+        print("  (SITE_PASSWORD not set — output is unencrypted)")
 
 
 def _sigma_commentary(df: pd.DataFrame) -> str:
